@@ -19,8 +19,8 @@ use rand::seq::SliceRandom;
 struct Taquin {
     size: i32,
     taq: Vec<u32>,
-	close_list_len: i32,
-	esimate_dst: i32,
+	close_list_len: i32, //  G
+	esimate_dst: i32,    //  H
 }
 
 impl PartialEq for Taquin {
@@ -166,6 +166,10 @@ impl Taquin {
 
 	fn print(&self) {
 		let sq: usize = (self.size * self.size) as usize;
+
+		println!("estimate dst: {} ", self.esimate_dst);
+		println!("close list len: {} ", self.close_list_len);
+
 		for i in 0..sq {
 			print!("{number:>width$} ", number=self.taq[i], width=2);
 			// print!("{number:>2} ", number=self.taq[i]);
@@ -179,6 +183,7 @@ impl Taquin {
 	fn is_valid(&self) -> bool {
 		let sq: u32 = (self.size * self.size) as u32;
 		let mut v: Vec<u32> = Vec::new();
+
 		if self.taq.len() != sq as usize {
 			return false;
 		}
@@ -206,57 +211,98 @@ impl Taquin {
 		(self.estimate_one(&final_state, 0) % 2 == cmpt % 2)
 	}
 
-	fn create_open_list(&mut self, open_list: & mut Vec<Taquin>, close_list: &mut Vec<Taquin>) {
+	// fn create_open_list(&mut self, &mut open_list: Vec<Taquin>, close_list: & Vec<Taquin>) {
+	fn create_open_list(&mut self, open_list: &mut Vec<Taquin>, close_list: &mut Vec<Taquin>) {
+		// let functions: Vec< for<'r> fn(&'r Taquin) -> (Result<Taquin, io::Error>)> = vec![Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
+		static MOVE_FUNCTIONS: &[ fn(&Taquin) -> (Result<Taquin, io::Error>); 4]  = &[Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
 
-		let functions: Vec< for<'r> fn(&'r Taquin) -> (Result<Taquin, io::Error>)> = vec![Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
-		// let functions: Vec< fn(&mut self) -> (Result<Taquin, io::Error>)> = vec![self.move_down, self.move_up, self.move_left, self.move_right];
-
-		for function in functions {
-				// match function() {
+		for function in MOVE_FUNCTIONS {
 				match function(self) {
-				Ok(mut a) => match close_list.contains(&a) {
-					true  => (),
-					false =>  {
-						a.esimate_dst = a.distance_estimator() as i32;
-						open_list.push(a);
-						}
-					}
+				Ok(mut a) => if !close_list.contains(&a) && a.esimate_dst == -1 {
+					a.esimate_dst = a.distance_estimator() as i32;
+					a.close_list_len = self.close_list_len + 1;
+					open_list.push(a);
+				}
 				Err(_) => (),
 			}
 		open_list.sort_by(|a, b| (a.esimate_dst.cmp(&b.esimate_dst)));
 		}
-
 	}
 
-	fn solve(&mut self, close_list: &mut Vec<Taquin>, open_list: &mut Vec<Taquin>) -> bool {
-		// let ref mut open_list: Vec<Taquin> = Vec::new();
+	fn solve(&mut self, close_list: & mut Vec<Taquin>,  open_list: & mut Vec<Taquin>) -> bool {
+
+		// if close_list.contains(&self) {
+			// return false;
+		// }
 
 		self.close_list_len = close_list.len() as i32;
-		self.esimate_dst = self.distance_estimator() as i32;
-	
+		println!("current puzzle: ");
+		self.print();
+		println!("close_list_len: {} esimate_dst: {}", self.close_list_len, self.esimate_dst);
 		close_list.push(self.copy());
-		if self.distance_estimator() == 0 {
-			return true;
-		}
-		// thread::sleep(time::Duration::from_millis(150));
-		// println!("self.distance_estimator {}",self.distance_estimator());
 		self.create_open_list(open_list, close_list);
 
-		println!("open_list.len(){}",open_list.len());
-		// let actual_len = close_list.len();
-		// open_list.sort_by(|a, b| (a.esimate_dst.cmp(&b.esimate_dst)));
+		let o_list: Vec<Taquin> = test_cp_vec(&open_list);
 
-		for e in open_list {
-			if e.solve(close_list, open_list) {
-				// println!("close_list.len(){}",close_list.len());
-				// self.print();
-				return true;
-			}
+		println!("close list: ");
+		for e in close_list.iter() {
+			e.print();
 		}
-		close_list.pop();
+		println!("open list: ");
+		for e in open_list.iter() {
+			e.print();
+		}
+		// for mut e in o_list {
+		// 	if !close_list.contains(&e) {
+		// 		e.solve(close_list, open_list);
+		// 	}
+		// }
+		println!("-------- end");
+		// close_list.pop();
 		false
 	}
 }
+// 	fn solve(&mut self, close_list: &mut Vec<Taquin>, open_list: &mut Vec<Taquin>) -> bool {
+// 		// let ref mut open_list: Vec<Taquin> = Vec::new();
+
+// 		self.close_list_len = close_list.len() as i32;
+// 		self.esimate_dst = self.distance_estimator() as i32;
+// 		// println!("SOLVE: ");
+// 		// self.print();
+// 		close_list.push(self.copy());
+// 		if self.distance_estimator() == 0 {
+// 			return true;
+// 		}
+// 		// thread::sleep(time::Duration::from_millis(150));
+// 		// println!("self.distance_estimator {}",self.distance_estimator());
+// 		self.create_open_list(open_list, close_list);
+// 		let ref mut o_list: Vec<Taquin> = test_cp_vec(open_list) ;
+
+// 		// println!("open_list.len(){}",open_list.len());
+// 		// let actual_len = close_list.len();
+// 		// open_list.sort_by(|a, b| (a.esimate_dst.cmp(&b.esimate_dst)));
+
+// 		// o_list.last().unwrap().print();
+// 		// close_list.last().unwrap().print();
+
+// 		for e in o_list {
+// 			println!("open_list.len(){}\nestimate_dst: {}, close_list_len: {}\nparse:",open_list.len(), e.esimate_dst, e.close_list_len);
+// 			e.print();
+// 			// if e.solve(close_list, open_list) {
+// 				// return true;
+// 			// }
+// 		}
+// 		for e in o_list {
+// 			e.print();
+// 			// if e.solve(close_list, open_list) {
+// 				// return true;
+// 			// }
+// 		}
+
+// 		close_list.pop();
+// 		false
+// 	}
+// }
 
 fn get_puzzle(file_name: (bool, String)) -> Result<Taquin, io::Error> {
 	match file_name.0 {
@@ -265,8 +311,17 @@ fn get_puzzle(file_name: (bool, String)) -> Result<Taquin, io::Error> {
 	}
 }
 
+fn test_cp_vec(open_list: & Vec<Taquin>) -> Vec<Taquin> {
+	let mut o_list: Vec<Taquin> = Vec::new();
+
+	for e in open_list {
+		o_list.push(e.copy());
+	}
+	o_list
+}
+
 fn main() {
-	let mut close_list: Vec<Taquin> = Vec::new();
+	let ref mut close_list: Vec<Taquin> = Vec::new();
 	// let mut open_list: Vec<Taquin> = Vec::new();
 	let ref mut open_list: Vec<Taquin> = Vec::new();
 
@@ -282,9 +337,10 @@ fn main() {
 	if taquin.is_valid() && taquin.is_soluble() {
 		println!("VALID and Soluble!");
 		taquin.print();
-		taquin.solve(&mut close_list, open_list);
-		for e in &close_list {
-			println!("solution: {}", close_list.len());
+		taquin.esimate_dst = taquin.distance_estimator() as i32;
+		taquin.solve(close_list, open_list);
+		for e in close_list {
+			// println!("solution: {}", close_list.len());
 			e.print();
 			// thread::sleep(time::Duration::from_millis(150));
 		}
