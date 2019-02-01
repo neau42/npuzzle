@@ -5,4 +5,5 @@ authors = ["no <no@42.fr>"]
 edition = "2018"
 
 [dependencies]
-rand = "0.6.4"
+rand = "0.6.5"
+colored = "1.7"

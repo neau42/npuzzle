@@ -12,6 +12,8 @@ use std::io;
 use std::io::ErrorKind as IoErr;
 
 use rand::seq::SliceRandom;
+extern crate colored;
+use colored::*;
 
 
 // #[derive(Debug, Clone)]
@@ -19,8 +21,9 @@ use rand::seq::SliceRandom;
 struct Taquin {
     size: i32,
     taq: Vec<u32>,
-	close_list_len: i32, //  G
+	actual_len: i32, //  G
 	esimate_dst: i32,    //  H
+	// dst:i32,
 }
 
 impl PartialEq for Taquin {
@@ -57,11 +60,9 @@ impl Taquin {
 			v[index as usize] = value as u32;
 			cmpt -= 1;
 		}
-		Taquin { size: size as i32, taq : v.clone(), close_list_len: -1, esimate_dst: -1 }
+		Taquin { size: size as i32, taq : v.clone(), actual_len: -1, esimate_dst: -1 }
 	}
 	
-
-
 	fn copy(&self) -> Taquin {
 		let sq: usize = (self.size * self.size) as usize;
 		let mut v: Vec<u32> = Vec::new();
@@ -70,7 +71,7 @@ impl Taquin {
 			// v[i] = self.taq[i];
 			v.push(self.taq[i]);
 		}
-		Taquin { size: self.size as i32, taq : v, close_list_len: self.close_list_len, esimate_dst: self.esimate_dst }
+		Taquin { size: self.size as i32, taq : v, actual_len: self.actual_len, esimate_dst: self.esimate_dst }
 	}
 
 	fn get_pos_of_value(&self, value: u32) -> u32 {
@@ -94,70 +95,46 @@ impl Taquin {
 			+ (self.get_pos_y_of_idx(pos_current) as i32 - final_state.get_pos_y_of_idx(pos_final) as i32).abs()) as u32
 	}
 
-	fn distance_estimator(&self) -> u32 {
+	fn distance_estimator(&self, final_state: &Taquin) -> u32 {
 		let mut cmpt: u32 = 0;
-		let final_state = Taquin::gen_final_state(self.size as usize);
+		let sq: usize = (self.size * self.size) as usize;
 
-		for i in 0..self.size*self.size - 1 {
+		for i in 0..sq - 1 {
 			cmpt += self.estimate_one(&final_state, i as u32);
 		}
 		cmpt
 	}
 
-	fn try_move_left(&self) -> bool {
-		!(self.get_pos_of_value(0) % self.size as u32  == self.size as u32 - 1)
-	}
-
-	fn move_left(&self) -> Result<Taquin, io::Error> {
-		let zero_pos = self.get_pos_of_value(0) as usize;
-		
-		if self.try_move_left() {
-			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), close_list_len: -1, esimate_dst: -1 };
+	fn move_left(&self, zero_pos: usize) -> Result<Taquin, io::Error> {
+		if !(zero_pos % self.size as usize  == self.size as usize - 1) {
+			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, esimate_dst: -1 };
 			new_taquin.taq.swap(zero_pos, zero_pos + 1);
 			return Ok(new_taquin);
 		}
 		Err(std::io::Error::new(IoErr::Other, "_"))
 	}
 
-	fn try_move_right(&self) -> bool {
-		!(self.get_pos_of_value(0) % self.size as u32  == 0)
-	}
-
-	fn move_right(&self) -> Result<Taquin, io::Error> {
-		let zero_pos = self.get_pos_of_value(0) as usize;
-		
-		if self.try_move_right() {
-			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), close_list_len: -1, esimate_dst: -1 };
+	fn move_right(&self, zero_pos: usize) -> Result<Taquin, io::Error> {
+		if !(zero_pos % self.size as usize  == 0) {
+			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, esimate_dst: -1 };
 			new_taquin.taq.swap(zero_pos, zero_pos - 1);
 			return Ok(new_taquin);
 		}
 		Err(std::io::Error::new(IoErr::Other, "_"))
 	}
 
-	fn try_move_down(&self) -> bool {
-		!(self.get_pos_of_value(0) < self.size as u32)
-	}
-
-	fn move_down(&self) -> Result<Taquin, io::Error> {
-		let zero_pos = self.get_pos_of_value(0) as usize;
-		
-		if self.try_move_down() {
-			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), close_list_len: -1, esimate_dst: -1 };
+	fn move_down(&self, zero_pos: usize) -> Result<Taquin, io::Error> {
+		if !(zero_pos < self.size as usize) {
+			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, esimate_dst: -1 };
 			new_taquin.taq.swap(zero_pos, zero_pos - self.size as usize);
 			return Ok(new_taquin);
 		}
 		Err(std::io::Error::new(IoErr::Other, "_"))
 	}
 
-	fn try_move_up(&self) -> bool {
-		!(self.get_pos_of_value(0) >= (self.size * self.size - self.size) as u32)
-	}
-
-	fn move_up(&self) -> Result<Taquin, io::Error> {
-		let zero_pos = self.get_pos_of_value(0) as usize;
-		
-		if self.try_move_up() {
-			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), close_list_len: -1, esimate_dst: -1 };
+	fn move_up(&self, zero_pos: usize) -> Result<Taquin, io::Error> {
+		if !(zero_pos >= (self.size * self.size - self.size) as usize) {
+			let mut new_taquin = Taquin{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, esimate_dst: -1 };
 			new_taquin.taq.swap(zero_pos, zero_pos + self.size as usize);
 			return Ok(new_taquin);
 		}
@@ -167,9 +144,6 @@ impl Taquin {
 	fn print(&self) {
 		let sq: usize = (self.size * self.size) as usize;
 
-		println!("estimate dst: {} ", self.esimate_dst);
-		println!("close list len: {} ", self.close_list_len);
-
 		for i in 0..sq {
 			print!("{number:>width$} ", number=self.taq[i], width=2);
 			// print!("{number:>2} ", number=self.taq[i]);
@@ -177,6 +151,8 @@ impl Taquin {
 				print!("\n");
 			}
 		}
+		println!("> H: ({}) G: ({}) F: ({})", self.esimate_dst, self.actual_len, self.actual_len + self.esimate_dst);
+		// println!("actual len: {} ", self.actual_len);
 		print!("\n");
 	}
 
@@ -210,99 +186,59 @@ impl Taquin {
 		}
 		(self.estimate_one(&final_state, 0) % 2 == cmpt % 2)
 	}
+}
+fn create_open_list(puzzle: &mut Taquin, open_list: &mut Vec<Taquin>, close_list: &mut Vec<Taquin>, final_state: & Taquin) {
+	// let functions: Vec< for<'r> fn(&'r Taquin) -> (Result<Taquin, io::Error>)> = vec![Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
+	static MOVE_FUNCTIONS: &[ fn(&Taquin, usize) -> (Result<Taquin, io::Error>); 4]  = &[Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
+	let zero_pos = puzzle.get_pos_of_value(0) as usize;
+	// let final_state = Taquin::gen_final_state(puzzle.size as usize);
 
-	// fn create_open_list(&mut self, &mut open_list: Vec<Taquin>, close_list: & Vec<Taquin>) {
-	fn create_open_list(&mut self, open_list: &mut Vec<Taquin>, close_list: &mut Vec<Taquin>) {
-		// let functions: Vec< for<'r> fn(&'r Taquin) -> (Result<Taquin, io::Error>)> = vec![Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
-		static MOVE_FUNCTIONS: &[ fn(&Taquin) -> (Result<Taquin, io::Error>); 4]  = &[Taquin::move_down, Taquin::move_up, Taquin::move_left, Taquin::move_right];
-
-		for function in MOVE_FUNCTIONS {
-				match function(self) {
-				Ok(mut a) => if !close_list.contains(&a) && a.esimate_dst == -1 {
-					a.esimate_dst = a.distance_estimator() as i32;
-					a.close_list_len = self.close_list_len + 1;
-					open_list.push(a);
-				}
-				Err(_) => (),
+	for function in MOVE_FUNCTIONS {
+			match function(&puzzle, zero_pos) {
+			Ok(mut a) => if !close_list.contains(&a) {
+				// if open_list.contains(&a) {
+					// println!("open_list CONTAIN!");
+// 
+				// }
+				a.esimate_dst = a.distance_estimator(&final_state) as i32;
+				a.actual_len = puzzle.actual_len + 1;
+				open_list.push(a);
 			}
-		open_list.sort_by(|a, b| (a.esimate_dst.cmp(&b.esimate_dst)));
+			Err(_) => (),
 		}
-	}
-
-	fn solve(&mut self, close_list: & mut Vec<Taquin>,  open_list: & mut Vec<Taquin>) -> bool {
-
-		// if close_list.contains(&self) {
-			// return false;
-		// }
-
-		self.close_list_len = close_list.len() as i32;
-		println!("current puzzle: ");
-		self.print();
-		println!("close_list_len: {} esimate_dst: {}", self.close_list_len, self.esimate_dst);
-		close_list.push(self.copy());
-		self.create_open_list(open_list, close_list);
-
-		let o_list: Vec<Taquin> = test_cp_vec(&open_list);
-
-		println!("close list: ");
-		for e in close_list.iter() {
-			e.print();
-		}
-		println!("open list: ");
-		for e in open_list.iter() {
-			e.print();
-		}
-		// for mut e in o_list {
-		// 	if !close_list.contains(&e) {
-		// 		e.solve(close_list, open_list);
-		// 	}
-		// }
-		println!("-------- end");
-		// close_list.pop();
-		false
+	open_list.sort_by(|a, b| ((b.esimate_dst + b.actual_len).cmp(&(a.esimate_dst + a.actual_len))));
 	}
 }
-// 	fn solve(&mut self, close_list: &mut Vec<Taquin>, open_list: &mut Vec<Taquin>) -> bool {
-// 		// let ref mut open_list: Vec<Taquin> = Vec::new();
 
-// 		self.close_list_len = close_list.len() as i32;
-// 		self.esimate_dst = self.distance_estimator() as i32;
-// 		// println!("SOLVE: ");
-// 		// self.print();
-// 		close_list.push(self.copy());
-// 		if self.distance_estimator() == 0 {
-// 			return true;
-// 		}
-// 		// thread::sleep(time::Duration::from_millis(150));
-// 		// println!("self.distance_estimator {}",self.distance_estimator());
-// 		self.create_open_list(open_list, close_list);
-// 		let ref mut o_list: Vec<Taquin> = test_cp_vec(open_list) ;
+fn solve(close_list: &mut Vec<Taquin>, open_list: &mut Vec<Taquin>) {
+	let final_state = Taquin::gen_final_state(open_list[0].size as usize);
 
-// 		// println!("open_list.len(){}",open_list.len());
-// 		// let actual_len = close_list.len();
-// 		// open_list.sort_by(|a, b| (a.esimate_dst.cmp(&b.esimate_dst)));
+		// for _i in 0..8 {
+		loop {
+		let ref mut puzzle = open_list.pop().unwrap();
+		// println!("current puzzle: ");
+		// puzzle.print();
+		if puzzle.esimate_dst == 0 {
+			println!("SUCCESS -_-");
+			puzzle.print();
+			break ;
+		}
+		// println!("{}", "close list: ".green());
+		// for e in close_list.iter() {
+		// 	e.print();
+		// }
+		create_open_list(puzzle, open_list, close_list, &final_state);
+		close_list.push(puzzle.copy());
+		// println!("{}", "open list: ".green());
+		// for e in open_list.iter() {
+		// 	e.print();
+		// }
+		// println!("---------------------------- end");
+		// thread::sleep(time::Duration::from_millis(350));
+	}
+}
 
-// 		// o_list.last().unwrap().print();
-// 		// close_list.last().unwrap().print();
 
-// 		for e in o_list {
-// 			println!("open_list.len(){}\nestimate_dst: {}, close_list_len: {}\nparse:",open_list.len(), e.esimate_dst, e.close_list_len);
-// 			e.print();
-// 			// if e.solve(close_list, open_list) {
-// 				// return true;
-// 			// }
-// 		}
-// 		for e in o_list {
-// 			e.print();
-// 			// if e.solve(close_list, open_list) {
-// 				// return true;
-// 			// }
-// 		}
-
-// 		close_list.pop();
-// 		false
-// 	}
-// }
 
 fn get_puzzle(file_name: (bool, String)) -> Result<Taquin, io::Error> {
 	match file_name.0 {
@@ -311,47 +247,44 @@ fn get_puzzle(file_name: (bool, String)) -> Result<Taquin, io::Error> {
 	}
 }
 
-fn test_cp_vec(open_list: & Vec<Taquin>) -> Vec<Taquin> {
-	let mut o_list: Vec<Taquin> = Vec::new();
+// fn test_cp_vec(open_list: & Vec<Taquin>) -> Vec<Taquin> {
+// 	let mut o_list: Vec<Taquin> = Vec::new();
 
-	for e in open_list {
-		o_list.push(e.copy());
-	}
-	o_list
-}
+// 	for e in open_list {
+// 		o_list.push(e.copy());
+// 	}
+// 	o_list
+// }
 
 fn main() {
 	let ref mut close_list: Vec<Taquin> = Vec::new();
-	// let mut open_list: Vec<Taquin> = Vec::new();
 	let ref mut open_list: Vec<Taquin> = Vec::new();
 
-
 	let file_name = get_first_arg();
-	let mut taquin = match get_puzzle(file_name) {
+	let ref mut puzzle = match get_puzzle(file_name) {
 		Ok(t) => t,
 		Err(e) => {
 			eprintln!("error: {}",e);
 			return ;
 		}
 	};
-	if taquin.is_valid() && taquin.is_soluble() {
+	if puzzle.is_valid() && puzzle.is_soluble() {
 		println!("VALID and Soluble!");
-		taquin.print();
-		taquin.esimate_dst = taquin.distance_estimator() as i32;
-		taquin.solve(close_list, open_list);
-		for e in close_list {
-			// println!("solution: {}", close_list.len());
-			e.print();
-			// thread::sleep(time::Duration::from_millis(150));
-		}
+		puzzle.print();
+		let final_state = Taquin::gen_final_state(puzzle.size as usize);
+		puzzle.esimate_dst = puzzle.distance_estimator(&final_state) as i32;
+		puzzle.actual_len = 0;
+		// create_open_list(puzzle, open_list, close_list);
+		open_list.push(puzzle.copy());
+
+
+		// close_list.push(puzzle.copy());
+		solve(close_list, open_list);
 	}
 	else {
 		println!("NOT VALID");
 	}
 }
-
-
-
 
 fn get_first_arg() -> (bool, String) {
 	let r: Vec<String> = env::args().collect();
@@ -422,7 +355,7 @@ fn read_file(name: String) -> Result<Taquin, io::Error> {
 	if size < 3 || v.len() != (size * size) as usize {
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Taquin { size : size, taq : v.clone(), close_list_len: -1, esimate_dst: -1 } )
+	Ok(Taquin { size : size, taq : v.clone(), actual_len: -1, esimate_dst: -1 } )
 }
 
 fn generate_random_taquin(size: u32) -> Taquin {
