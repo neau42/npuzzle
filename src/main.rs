@@ -1,10 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.rs                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
+/*   Updated: 2019/02/01 19:57:48 by no               ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 extern crate colored;
 use colored::*;
 use crate::puzzle::Puzzle;
 use std::io;
 pub mod parser;
 pub mod puzzle;
-use std::collections::VecDeque;
+// use std::collections::Vec;
 
 
 fn create_open_list(puzzle: &mut Puzzle, open_list: &mut Vec<Puzzle>, close_list: &mut Vec<Puzzle>, final_state: & Puzzle) {
@@ -35,13 +47,13 @@ fn create_open_list(puzzle: &mut Puzzle, open_list: &mut Vec<Puzzle>, close_list
 	}
 }
 
-fn solve(close_list: &mut Vec<Puzzle>, open_list: &mut Vec<Puzzle>) {
-	let final_state = Puzzle::gen_final_state(open_list[0].size as usize);
+fn solve(close_list: &mut Vec<Puzzle>, open_list: &mut Vec<Puzzle>, size: i32) {
+	let final_state = Puzzle::gen_final_state(size as usize);
 	// for _i in 0..3000 {
 		loop {
 		let ref mut puzzle = open_list.pop().unwrap();
-		// println!("current puzzle: ");
-		// puzzle.print();
+		println!("current puzzle: ");
+		puzzle.print();
 		if puzzle.esimate_dst == 0 {
 			println!("SUCCESS -_-");
 			puzzle.print();
@@ -84,7 +96,7 @@ fn main() {
 		// create_open_list(puzzle, open_list, close_list);
 		open_list.push(puzzle.copy());
 		// close_list.push(puzzle.copy());
-		solve(close_list, open_list);
+		solve(close_list, open_list, puzzle.size);
 	}
 	else {
 		println!("NOT VALID");

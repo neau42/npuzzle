@@ -1,7 +1,8 @@
 use std::io::ErrorKind as IoErr;
 use std::io;
+use std::cmp::Ordering;
 
-#[derive(Debug)]
+#[derive(Debug, Eq)]
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u32>,
@@ -15,6 +16,20 @@ impl PartialEq for Puzzle {
 			self.taq == other.taq
 		}
 	}
+
+impl PartialOrd for Puzzle {
+    fn partial_cmp(&self, other: &Puzzle) -> Option<Ordering> {
+		(self.esimate_dst + self.actual_len).partial_cmp(&(other.esimate_dst + other.actual_len))
+        // self.actual_len.cmp(&other.actual_len)
+    }
+}
+
+impl Ord for Puzzle {
+    fn cmp(&self, other: &Puzzle) -> Ordering {
+		(self.esimate_dst + self.actual_len).cmp(&(other.esimate_dst + other.actual_len))
+        // self.actual_len.cmp(&other.actual_len)
+    }
+}
 
 impl Puzzle {
 	pub fn gen_final_state(size: usize) -> Puzzle {
