@@ -60,7 +60,7 @@ fn get_size(line: String) -> Option<i32> {
 }
 
 fn read_file(name: String) -> Result<Puzzle, io::Error> {
-	let mut v: Vec<u32> = Vec::new();
+	let mut v: Vec<u8> = Vec::new();
 	let file = File::open(name)?;
 	let mut size_opt = None;
 	let mut size = 0;
@@ -84,12 +84,12 @@ fn read_file(name: String) -> Result<Puzzle, io::Error> {
 				if count > size || e.parse::<u32>().is_err() {
 					return Err(std::io::Error::new(IoErr::Other, "Bad format"));
 				}
-				v.push(e.parse::<u32>().unwrap());
+				v.push(e.parse::<u8>().unwrap());
 			}
 		}
 	}
 	if size < 3 || v.len() != (size * size) as usize {
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Puzzle { size : size, taq : v.clone(), actual_len: -1, esimate_dst: -1 } )
+	Ok(Puzzle { size : size, taq : v, actual_len: -1, esimate_dst: -1 } )
 }

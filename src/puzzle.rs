@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 #[derive(Debug, Eq)]
 pub struct Puzzle {
     pub size: i32,
-    pub taq: Vec<u32>,
+    pub taq: Vec<u8>,
 	pub actual_len: i32, //  G
 	pub esimate_dst: i32,    //  H
 	// dst:i32,
@@ -20,18 +20,26 @@ impl PartialEq for Puzzle {
 impl PartialOrd for Puzzle {
     fn partial_cmp(&self, other: &Puzzle) -> Option<Ordering> {
 		(self.esimate_dst + self.actual_len).partial_cmp(&(other.esimate_dst + other.actual_len))
-        // self.actual_len.cmp(&other.actual_len)
     }
 }
 
 impl Ord for Puzzle {
     fn cmp(&self, other: &Puzzle) -> Ordering {
 		(self.esimate_dst + self.actual_len).cmp(&(other.esimate_dst + other.actual_len))
-        // self.actual_len.cmp(&other.actual_len)
     }
 }
 
 impl Puzzle {
+	pub fn copy(&self) -> Puzzle {
+		let sq: usize = (self.size * self.size) as usize;
+		let mut v: Vec<u8> = Vec::new();
+
+		for i in 0..sq {
+			v.push(self.taq[i]);
+		}
+		Puzzle { size: self.size as i32, taq : v, actual_len: self.actual_len, esimate_dst: self.esimate_dst }
+	}
+
 	pub fn gen_final_state(size: usize) -> Puzzle {
 		let sq: usize = size * size;
 		let mut v = vec![0; sq];
@@ -56,48 +64,38 @@ impl Puzzle {
 				(false, false) => index + size as i32,
 				(false, true)  => index - size as i32,
 			};
-			v[index as usize] = value as u32;
+			v[index as usize] = value as u8;
 			cmpt -= 1;
 		}
-		Puzzle { size: size as i32, taq : v.clone(), actual_len: -1, esimate_dst: -1 }
-	}
-	
-	pub fn copy(&self) -> Puzzle {
-		let sq: usize = (self.size * self.size) as usize;
-		let mut v: Vec<u32> = Vec::new();
-
-		for i in 0..sq {
-			v.push(self.taq[i]);
-		}
-		Puzzle { size: self.size as i32, taq : v, actual_len: self.actual_len, esimate_dst: self.esimate_dst }
+		Puzzle { size: size as i32, taq : v, actual_len: -1, esimate_dst: -1 }
 	}
 
-	pub fn get_pos_of_value(&self, value: u32) -> u32 {
-		self.taq.iter().position(|r| *r == value).unwrap() as u32
+	pub fn get_pos_of_value(&self, value: u8) -> u8 {
+		self.taq.iter().position(|r| *r == value).unwrap() as u8
 	}
 
-	fn get_pos_x_of_idx(&self, idx: u32) -> u32 {
-		idx % self.size as u32
+	fn get_pos_x_of_idx(&self, idx: u8) -> u8 {
+		idx % self.size as u8
 	}
 
-	fn get_pos_y_of_idx(&self, idx: u32) -> u32 {
-		 idx / self.size as u32
+	fn get_pos_y_of_idx(&self, idx: u8) -> u8 {
+		 idx / self.size as u8
 	}
 
-	fn estimate_one(&self, final_state: &Puzzle, value: u32) -> u32 {
+	fn estimate_one(&self, final_state: &Puzzle, value: u8) -> u8 {
 		let pos_current = self.get_pos_of_value(value);
 		let pos_final = final_state.get_pos_of_value(value);
 
 		((self.get_pos_x_of_idx(pos_current) as i32 - final_state.get_pos_x_of_idx(pos_final) as i32).abs()
-			+ (self.get_pos_y_of_idx(pos_current) as i32 - final_state.get_pos_y_of_idx(pos_final) as i32).abs()) as u32
+			+ (self.get_pos_y_of_idx(pos_current) as i32 - final_state.get_pos_y_of_idx(pos_final) as i32).abs()) as u8
 	}
 
-	pub fn distance_estimator(&self, final_state: &Puzzle) -> u32 {
-		let mut cmpt: u32 = 0;
+	pub fn distance_estimator(&self, final_state: &Puzzle) -> u8 {
+		let mut cmpt: u8 = 0;
 		let sq: usize = (self.size * self.size) as usize;
 
 		for i in 0..sq - 1 {
-			cmpt += self.estimate_one(&final_state, i as u32);
+			cmpt += self.estimate_one(&final_state, i as u8);
 		}
 		cmpt
 	}
@@ -143,7 +141,6 @@ impl Puzzle {
 
 		for i in 0..sq {
 			print!("{number:>width$} ", number=self.taq[i], width=2);
-			// print!("{number:>2} ", number=self.taq[i]);
 			if i % (self.size as usize) == self.size as usize - 1 {
 				print!("\n");
 			}
@@ -153,8 +150,8 @@ impl Puzzle {
 	}
 
 	pub fn is_valid(&self) -> bool {
-		let sq: u32 = (self.size * self.size) as u32;
-		let mut v: Vec<u32> = Vec::new();
+		let sq: u8 = (self.size * self.size) as u8;
+		let mut v: Vec<u8> = Vec::new();
 
 		if self.taq.len() != sq as usize {
 			return false;
@@ -169,8 +166,8 @@ impl Puzzle {
 	}
 
 	pub fn is_soluble(&self) -> bool {
-		let mut cmpt: u32 = 0;
-		let mut vect_copy: Vec<u32> = self.taq.clone();
+		let mut cmpt: u8 = 0;
+		let mut vect_copy: Vec<u8> = self.taq.clone();
 		let sq: usize = (self.size * self.size) as usize;
 		let final_state = Puzzle::gen_final_state(self.size as usize);
 
