@@ -6,90 +6,32 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/02 19:28:23 by no               ###   ########.fr       */
+/*   Updated: 2019/02/03 22:45:15 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+use std::collections::HashMap;
 extern crate colored;
-use colored::*;
+// use colored::*;
+// use std::thread;
+// use std::time;
 use crate::puzzle::Puzzle;
-use std::io;
+// use std::io;
 pub mod parser;
+pub mod solver;
 pub mod puzzle;
 
-
-fn update_open_list(puzzle: &mut Puzzle, open_list: &mut Vec<Puzzle>, close_list: &mut Vec<Puzzle>, final_state: & Puzzle) {
-	static MOVE_FUNCTIONS: &[ fn(&Puzzle, usize) -> (Result<Puzzle, io::Error>); 4]  = &[Puzzle::move_down, Puzzle::move_up, Puzzle::move_left, Puzzle::move_right];
-	let zero_pos = puzzle.get_pos_of_value(0) as usize;
-
-	for function in MOVE_FUNCTIONS {
-			match function(&puzzle, zero_pos) {
-			Ok(mut a) => if !close_list.contains(&a) {//&& !open_list.contains(&a) {
-				a.esimate_dst = a.distance_estimator(&final_state) as i32;
-				a.actual_len = puzzle.actual_len + 1;
-				if open_list.contains(&a) {
-				let tst_pos = open_list.iter().position(|r| *r == a).unwrap();
-				if a.esimate_dst + a.actual_len < open_list[tst_pos].esimate_dst + open_list[tst_pos].actual_len {
-					open_list.remove(tst_pos);
-				}
-				else {
-					continue ;
-				}
-				// println!("open_list CONTAIN!");
-				// println!("in Position: {}\nnew:", tst_pos);
-				// a.print();
-				// println!("in open_list:");
-				// open_list[tst_pos].print();
-				}
-		 		
-				// //  dbg!(&open_list[tst_pos].esimate_dst);
-				// // dbg!(a.distance_estimator(&final_state));
-		 		// dbg!(&open_list[tst_pos].actual_len);
-				// dbg!(puzzle.actual_len + 1);
-
-				// }
-				open_list.push(a);
-			}
-			Err(_) => (),
-		}
-	open_list.sort_by(|a, b| ((b.esimate_dst + b.actual_len).cmp(&(a.esimate_dst + a.actual_len))));
-	}
-}
-
-fn solve(close_list: &mut Vec<Puzzle>, open_list: &mut Vec<Puzzle>, size: i32) {
-	let final_state = Puzzle::gen_final_state(size as usize);
-	// for _i in 0..3000 {
-		loop {
-		let ref mut puzzle = open_list.pop().unwrap();
-		// println!("current puzzle: ");
-		// puzzle.print();
-		if puzzle.esimate_dst == 0 {
-			println!("SUCCESS -_-");
-			puzzle.print();
-			break ;
-		}
-		// println!("{}", "close list: ".green());
-		// for e in close_list.iter() {
-		// 	e.print();
-		// }
-		update_open_list(puzzle, open_list, close_list, &final_state);
-		close_list.push(puzzle.copy());
-		// println!("{}", "open list: ".green());
-		// for e in open_list.iter() {
-		// 	e.print();
-		// }
-		// println!("---------------------------- end");
-		// thread::sleep(time::Duration::from_millis(350));
-	}
-	println!("open list LEN {}", open_list.len());
-}
-
 fn main() {
-	let ref mut close_list: Vec<Puzzle> = Vec::new();
-	let ref mut open_list: Vec<Puzzle> = Vec::new();
+	let ref mut close_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
+	let ref mut open_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
+	// let mut vikings = HashMap::new();
+	// let ref mut close_list: Vec<Puzzle> = Vec::new();
+	// let ref mut open_list: Vec<Puzzle> = Vec::new();
+	
+	
 
 	let file_name = parser::get_arg();
-	let ref mut puzzle = match parser::get_puzzle(file_name) {
+	let mut puzzle = match parser::get_puzzle(file_name) {
 		Ok(t) => t,
 		Err(e) => {
 			eprintln!("error: {}",e);
@@ -100,10 +42,18 @@ fn main() {
 		println!("VALID and Soluble!");
 		puzzle.print();
 		let final_state = Puzzle::gen_final_state(puzzle.size as usize);
-		puzzle.esimate_dst = puzzle.distance_estimator(&final_state) as i32;
+		puzzle.distance_estimator(&final_state);
 		puzzle.actual_len = 0;
-		open_list.push(puzzle.copy());
-		solve(close_list, open_list, puzzle.size);
+		let i = puzzle.esimate_dst;
+		// open_list.insert(puzzle, i);
+
+
+		// for val in open_list.keys() {
+		// 	println!("{:?}", val);
+		// }
+		// open_list.push(puzzle.copy());
+		// solve(close_list, open_list, puzzle.size);
+		solver::solve(close_list, open_list, &mut puzzle);
 	}
 	else {
 		println!("NOT VALID");

@@ -2,7 +2,7 @@ use std::io::ErrorKind as IoErr;
 use std::io;
 use std::cmp::Ordering;
 
-#[derive(Debug, Eq)]
+#[derive(Debug, Eq, Hash)]
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u8>,
@@ -30,6 +30,10 @@ impl Ord for Puzzle {
 }
 
 impl Puzzle {
+	pub fn new(size: i32, taq: Vec<u8>, actual_len: i32, esimate_dst: i32) -> Puzzle {
+		Puzzle { size, taq, actual_len, esimate_dst}
+	}
+
 	pub fn copy(&self) -> Puzzle {
 		let sq: usize = (self.size * self.size) as usize;
 		let mut v: Vec<u8> = Vec::new();
@@ -37,7 +41,8 @@ impl Puzzle {
 		for i in 0..sq {
 			v.push(self.taq[i]);
 		}
-		Puzzle { size: self.size as i32, taq : v, actual_len: self.actual_len, esimate_dst: self.esimate_dst }
+		Puzzle::new(self.size, v, self.actual_len, self.esimate_dst)
+		// Puzzle { size: self.size as i32, taq : v, actual_len: self.actual_len, esimate_dst: self.esimate_dst }
 	}
 
 	pub fn gen_final_state(size: usize) -> Puzzle {
@@ -90,14 +95,15 @@ impl Puzzle {
 			+ (self.get_pos_y_of_idx(pos_current) as i32 - final_state.get_pos_y_of_idx(pos_final) as i32).abs()) as u8
 	}
 
-	pub fn distance_estimator(&self, final_state: &Puzzle) -> u8 {
+	pub fn distance_estimator(&mut self, final_state: &Puzzle) {
 		let mut cmpt: u8 = 0;
 		let sq: usize = (self.size * self.size) as usize;
 
 		for i in 0..sq - 1 {
 			cmpt += self.estimate_one(&final_state, i as u8);
 		}
-		cmpt
+		self.esimate_dst = cmpt as i32;
+		// cmpt
 	}
 
 	pub fn move_left(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
