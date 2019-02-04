@@ -91,5 +91,5 @@ fn read_file(name: String) -> Result<Puzzle, io::Error> {
 	if size < 3 || v.len() != (size * size) as usize {
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Puzzle { size : size, taq : v, actual_len: -1, estimate_dst: -1 } )
+	Ok(Puzzle { size : size, taq : v, actual_dst: -1, estimate_dst: -1 } )
 }

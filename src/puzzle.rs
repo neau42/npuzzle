@@ -6,7 +6,7 @@ use std::cmp::Ordering;
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u8>,
-	pub actual_len: i32, //  G
+	pub actual_dst: i32, //  G
 	pub estimate_dst: i32,    //  H
 	// dst:i32,
 }
@@ -19,19 +19,19 @@ impl PartialEq for Puzzle {
 
 impl PartialOrd for Puzzle {
     fn partial_cmp(&self, other: &Puzzle) -> Option<Ordering> {
-		(self.estimate_dst + self.actual_len).partial_cmp(&(other.estimate_dst + other.actual_len))
+		(self.estimate_dst + self.actual_dst).partial_cmp(&(other.estimate_dst + other.actual_dst))
     }
 }
 
 impl Ord for Puzzle {
     fn cmp(&self, other: &Puzzle) -> Ordering {
-		(self.estimate_dst + self.actual_len).cmp(&(other.estimate_dst + other.actual_len))
+		(self.estimate_dst + self.actual_dst).cmp(&(other.estimate_dst + other.actual_dst))
     }
 }
 
 impl Puzzle {
-	pub fn new(size: i32, taq: Vec<u8>, actual_len: i32, estimate_dst: i32) -> Puzzle {
-		Puzzle { size, taq, actual_len, estimate_dst}
+	pub fn new(size: i32, taq: Vec<u8>, actual_dst: i32, estimate_dst: i32) -> Puzzle {
+		Puzzle { size, taq, actual_dst, estimate_dst}
 	}
 
 	pub fn copy(&self) -> Puzzle {
@@ -41,8 +41,8 @@ impl Puzzle {
 		for i in 0..sq {
 			v.push(self.taq[i]);
 		}
-		Puzzle::new(self.size, v, self.actual_len, self.estimate_dst)
-		// Puzzle { size: self.size as i32, taq : v, actual_len: self.actual_len, estimate_dst: self.estimate_dst }
+		Puzzle::new(self.size, v, self.actual_dst, self.estimate_dst)
+		// Puzzle { size: self.size as i32, taq : v, actual_dst: self.actual_dst, estimate_dst: self.estimate_dst }
 	}
 
 	pub fn gen_final_state(size: usize) -> Puzzle {
@@ -72,7 +72,7 @@ impl Puzzle {
 			v[index as usize] = value as u8;
 			cmpt -= 1;
 		}
-		Puzzle { size: size as i32, taq : v, actual_len: -1, estimate_dst: 0 }
+		Puzzle { size: size as i32, taq : v, actual_dst: -1, estimate_dst: 0 }
 	}
 
 	pub fn get_pos_of_value(&self, value: u8) -> u8 {
@@ -117,7 +117,7 @@ impl Puzzle {
 				print!("\n");
 			}
 		}
-		println!("> H: ({}) G: ({}) F: ({})", self.estimate_dst, self.actual_len, self.actual_len + self.estimate_dst);
+		println!("> H: ({}) G: ({}) F: ({})", self.estimate_dst, self.actual_dst, self.actual_dst + self.estimate_dst);
 		print!("\n");
 	}
 
@@ -232,13 +232,13 @@ pub fn print_puzzle(taquin: & Vec<u8>, size: usize) {
 			}
 		}
 		print!("\n");
-		// println!("> H: ({}) G: ({}) F: ({})", self.estimate_dst, self.actual_len, self.actual_len + self.estimate_dst);
+		// println!("> H: ({}) G: ({}) F: ({})", self.estimate_dst, self.actual_dst, self.actual_dst + self.estimate_dst);
 	}
 
 
 	// pub fn move_left(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
 	// 	if !(zero_pos % self.size as usize  == self.size as usize - 1) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, estimate_dst: -1 };
+	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
 	// 		new_taquin.taq.swap(zero_pos, zero_pos + 1);
 	// 		return Ok(new_taquin);
 	// 	}
@@ -247,7 +247,7 @@ pub fn print_puzzle(taquin: & Vec<u8>, size: usize) {
 
 	// pub fn move_right(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
 	// 	if !(zero_pos % self.size as usize  == 0) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, estimate_dst: -1 };
+	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
 	// 		new_taquin.taq.swap(zero_pos, zero_pos - 1);
 	// 		return Ok(new_taquin);
 	// 	}
@@ -256,7 +256,7 @@ pub fn print_puzzle(taquin: & Vec<u8>, size: usize) {
 
 	// pub fn move_down(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
 	// 	if !(zero_pos < self.size as usize) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, estimate_dst: -1 };
+	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
 	// 		new_taquin.taq.swap(zero_pos, zero_pos - self.size as usize);
 	// 		return Ok(new_taquin);
 	// 	}
@@ -265,7 +265,7 @@ pub fn print_puzzle(taquin: & Vec<u8>, size: usize) {
 
 	// pub fn move_up(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
 	// 	if !(zero_pos >= (self.size * self.size - self.size) as usize) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_len: -1, estimate_dst: -1 };
+	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
 	// 		new_taquin.taq.swap(zero_pos, zero_pos + self.size as usize);
 	// 		return Ok(new_taquin);
 	// 	}

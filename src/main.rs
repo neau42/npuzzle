@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/04 01:29:21 by no               ###   ########.fr       */
+/*   Updated: 2019/02/04 03:51:57 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,6 @@ pub mod solver;
 pub mod puzzle;
 
 fn main() {
-	// let ref mut close_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
-	// let ref mut open_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
-	// let ref mut close_list: Vec<Puzzle> = Vec::new();
-	// let ref mut open_list: Vec<Puzzle> = Vec::new();
-	
-	
 
 	let file_name = parser::get_arg();
 	let mut puzzle = match parser::get_puzzle(file_name) {
@@ -42,7 +36,7 @@ fn main() {
 		puzzle.print();
 		let final_state = Puzzle::gen_final_state(puzzle.size as usize);
 		puzzle.estimate_dst = puzzle::distance_estimator(&puzzle.taq, &final_state) as i32;
-		puzzle.actual_len = 0;
+		puzzle.actual_dst = 0;
 		// open_list.insert(puzzle, i);
 
 

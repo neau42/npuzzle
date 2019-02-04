@@ -1,5 +1,5 @@
-// use std::thread;
-// use std::time;
+use std::thread;
+use std::time;
 use std::io;
 use std::collections::HashMap;
 
@@ -7,7 +7,8 @@ use std::collections::HashMap;
 use crate::puzzle;
 use crate::puzzle::Puzzle;
 
-pub fn update_open_list(puzzle: &mut Puzzle, close_list: &mut HashMap<Vec<u8>, i32>, open_list: & mut HashMap<Vec<u8>, i32>, final_state: & Puzzle) {
+
+pub fn update_open_list(puzzle: & Puzzle, close_list: &mut HashMap<Vec<u8>, (i32, i32, Vec<u8>)>, open_list: & mut HashMap<Vec<u8>, (i32, i32, Vec<u8>)>, final_state: & Puzzle) {
 	static MOVE_FUNCTIONS: &[ fn(&Vec<u8>, usize, usize) -> Result<Vec<u8>, io::Error>; 4] =
 	&[puzzle::move_up, puzzle::move_down, puzzle::move_left, puzzle::move_right];
 	let zero_pos = puzzle.get_pos_of_value(0) as usize;
@@ -15,10 +16,10 @@ pub fn update_open_list(puzzle: &mut Puzzle, close_list: &mut HashMap<Vec<u8>, i
 	for function in MOVE_FUNCTIONS {
 		match function(&puzzle.taq, zero_pos, puzzle.size as usize) {
 			Ok(taquin) => {
-				let dst = puzzle::distance_estimator(&taquin, final_state);
 				// if !open_list.contains_key(&taquin) && (!close_list.contains_key(&taquin) || *close_list.get(&taquin).unwrap() >= dst) {
 				if !open_list.contains_key(&taquin) && !close_list.contains_key(&taquin) {
-					open_list.insert(taquin.clone(), dst);
+				let dst = puzzle::distance_estimator(&taquin, final_state);
+					open_list.insert(taquin.clone(),( dst, puzzle.actual_dst + 1, puzzle.taq.clone()));
 				}
 			}
 			_ =>  (),
@@ -26,62 +27,137 @@ pub fn update_open_list(puzzle: &mut Puzzle, close_list: &mut HashMap<Vec<u8>, i
 	}
 }
 
-pub fn find_better_in_open_list(open_list: &mut HashMap<Vec<u8>, i32>, final_state: & Puzzle) -> Vec<u8> {
+pub fn find_better_in_open_list(open_list: &mut HashMap<Vec<u8>, (i32, i32, Vec<u8>)>, final_state: & Puzzle, predecessor: &mut Vec<u8>) -> (Vec<u8>, i32) {
 
 	let mut tmp_dst: i32 = std::i32::MAX;
 	let mut tmp_vec: Vec<u8> = Vec::new();
+	let mut tmp_actual_dst: i32 = std::i32::MAX;
 
-	for (vec, dst) in open_list.iter() {
-		// println!("OPEN LIST: :: {:?}::{}",vec, dst);
+	for (vec, (estimate_dst, actual_dst, prev)) in open_list.iter() {
+		// println!("OPEN LIST: :: {:?}::{}",vec, estimate_dst);
 		// puzzle::print_puzzle(&vec, final_state.size as usize);
-		if *dst < tmp_dst {
-			tmp_dst = *dst;
+		if *estimate_dst < tmp_dst {
+			tmp_dst = *estimate_dst;
 			tmp_vec = vec.clone();
+			tmp_actual_dst = *actual_dst;
+			*predecessor = (*prev).clone();
 		}
 	}
-	
-	// println!("---------------");
-	// println!("BETTER:: {:?}::{}",tmp_vec, tmp_dst);
-	// puzzle::print_puzzle(&tmp_vec, final_state.size as usize);
-	// println!("---------------");
+	(tmp_vec, tmp_actual_dst)
+}
 
-	tmp_vec
-	// Puzzle::gen_final_state(final_state.size as usize).taq
+fn print_all(puzzle: & Puzzle, close_list: &mut HashMap<Vec<u8>, (i32, i32, Vec<u8>)>, size: i32, mut predecessor: Vec<u8>) {
+	// let mut predecessor: puzzle.taq.clone();
+	// let mut predecessor: Vec<u8> = vec![0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    let mut taq = puzzle.taq.clone();
+
+	loop {
+			println!("n-PUZZLE::  ");
+			puzzle::print_puzzle(&taq, size as usize);
+			// let ref mut t = predecessor;
+			let t = match close_list.get(&predecessor) {
+				Some(x) => x.2.clone(),
+				_ => break,
+			};
+			predecessor = t;
+			// taq = predecessor.clone();
+	}
+
+		// loop {
+		// 	println!("puzzle: ");
+		// 	puzzle::print_puzzle(&puzzle.taq, final_state.size as usize);
+		// 	puzzle.taq = predecessor.clone();
+		// 	let t = match close_list.get(&predecessor) {
+		// 		Some(x) => x.2.clone(),
+		// 		_ => break,
+		// 	};
+		// 	predecessor = t;
+		// 	//  = t.2.clone();
+
 }
 
 pub fn solve(puzzle: &mut Puzzle) {
 	let final_state = Puzzle::gen_final_state(puzzle.size as usize);
-	let mut close_list: HashMap<Vec<u8>, i32> = HashMap::new();
-	let mut open_list: HashMap<Vec<u8>, i32>  = HashMap::new();
+	let mut close_list: HashMap<Vec<u8>, (i32, i32, Vec<u8>)> = HashMap::new();
+	let mut open_list: HashMap<Vec<u8>, (i32, i32, Vec<u8>)>  = HashMap::new();
 	let ref mut o_list = open_list;
 	let ref mut c_list = close_list;
-	let mut dst;
+	let ref mut predecessor: Vec<u8> = vec![0, 0, 0, 0, 0, 0, 0, 0, 0];
 
-	o_list.insert(puzzle.taq.clone(), puzzle.estimate_dst);
+	o_list.insert(puzzle.taq.clone(), (puzzle.estimate_dst, 0, predecessor.clone()));
 
-	// for _i in 0..5 {
-	loop {
-		dst = puzzle::distance_estimator(&puzzle.taq, &final_state);
-		if dst == 0 {
-			println! ("Success: -_-|");
-			break ;
-		}
-		c_list.insert(puzzle.taq.clone(), dst);
-		o_list.remove(&puzzle.taq);
+	// loop {
+
+	while puzzle::distance_estimator(&puzzle.taq, &final_state) != 0 {
+		c_list.insert(puzzle.taq.clone(), o_list.remove(&puzzle.taq).unwrap());
 		update_open_list(puzzle, c_list, o_list, &final_state);
-		puzzle.taq = find_better_in_open_list(o_list, &final_state);
+		let t = find_better_in_open_list(o_list, &final_state, predecessor);
+		puzzle.taq = t.0;
+		puzzle.actual_dst = t.1;
+		println!("[tst]: predecessor: {:?}", predecessor);
 	}
+	println! ("Success: -_-|");
+	// println! ("LAST PREDECESSOR: {:?}", predecessor);
+	print_all(puzzle, c_list, final_state.size, predecessor.clone());
 
+	// loop {
+	// 		println!("puzzle: ");
+	// 		puzzle::print_puzzle(&puzzle.taq, final_state.size as usize);
+	// 		puzzle.taq = predecessor.clone();
+	// 		let ref mut t = predecessor;
+	// 		predecessor = match c_list.get(t) {
+	// 			Some(x) => & mut x.2.clone(),
+	// 			_ => break,
+	// 		};
+	// 		// predecessor = &mut t;
+	// 		//  = t.2.clone();
+	// }
 	println!("CLOSE LIST LEN : :: {}", c_list.len());
-	for (ve, dst) in c_list.iter() {
-		println!("CLOSE LIST: :: {}", dst);
-		puzzle::print_puzzle(&ve, final_state.size as usize);
+	for (vec, (estimate_dst, actual_dst, prev)) in c_list.iter() {
+			println!("CLOSE LIST: :: {} / {} prev: {:?}", estimate_dst, actual_dst, prev);
+			puzzle::print_puzzle(&vec, final_state.size as usize);
+			println!("PREV: ");
+			puzzle::print_puzzle(&prev, final_state.size as usize);
 	}
 	println!("OPEN LIST LEN : :: {}", o_list.len());
-	for (ve, dst) in o_list.iter() {
-		println!("OPEN LIST: :: {}", dst);
-		puzzle::print_puzzle(&ve, final_state.size as usize);
+	for (vec, (estimate_dst, actual_dst, prev)) in o_list.iter() {
+		println!("OPEN LIST: :: {} / {} prev: {:?}", estimate_dst, actual_dst, prev);
+		puzzle::print_puzzle(&vec, final_state.size as usize);
+		println!("PREV: ");
+		puzzle::print_puzzle(&prev, final_state.size as usize);
+
 	}
+	println!("-----------------\n\n");
+
+			// println!("puzzle: ");
+			// puzzle::print_puzzle(&puzzle.taq, final_state.size as usize);
+			// let t = close_list.get(&predecessor).unwrap();
+			// puzzle.taq = predecessor;
+			// predecessor = t.2.clone();
+
+			// println!("puzzle: ");
+			// puzzle::print_puzzle(&puzzle.taq, final_state.size as usize);
+			// let t = close_list.get(&predecessor).unwrap();
+			// puzzle.taq = predecessor;
+			// predecessor = t.2.clone();
+
+			// println!("puzzle: ");
+			// puzzle::print_puzzle(&puzzle.taq, final_state.size as usize);
+			// let t = close_list.get(&predecessor).unwrap();
+			// puzzle.taq = predecessor;
+			// predecessor = t.2.clone();
+
+			// puzzle::print_puzzle(&predecessor, final_state.size as usize);
+
+
+	// 		puzzle.taq = close_list.get(&predecessor).unwrap().2.clone();
+	// 		println!("--");
+	// 		thread::sleep(time::Duration::from_millis(350));
+
+	// }
+
+
 
 	
 }
@@ -97,10 +173,10 @@ pub fn solve(puzzle: &mut Puzzle) {
 // 			match function(&puzzle, zero_pos) {
 // 			Ok(mut a) => if !close_list.contains(&a) {//&& !open_list.contains(&a) {
 // 				a.distance_estimator(&final_state);
-// 				a.actual_len = puzzle.actual_len + 1;
+// 				a.actual_dst = puzzle.actual_dst + 1;
 // 				if open_list.contains(&a) {
 // 				let tst_pos = open_list.iter().position(|r| *r == a).unwrap();
-// 				if a.estimate_dst + a.actual_len < open_list[tst_pos].estimate_dst + open_list[tst_pos].actual_len {
+// 				if a.estimate_dst + a.actual_dst < open_list[tst_pos].estimate_dst + open_list[tst_pos].actual_dst {
 // 					open_list.remove(tst_pos);
 // 				}
 // 				else {
@@ -115,15 +191,15 @@ pub fn solve(puzzle: &mut Puzzle) {
 		 		
 // 				// //  dbg!(&open_list[tst_pos].estimate_dst);
 // 				// // dbg!(a.distance_estimator(&final_state));
-// 		 		// dbg!(&open_list[tst_pos].actual_len);
-// 				// dbg!(puzzle.actual_len + 1);
+// 		 		// dbg!(&open_list[tst_pos].actual_dst);
+// 				// dbg!(puzzle.actual_dst + 1);
 
 // 				// }
 // 				open_list.push(a);
 // 			}
 // 			Err(_) => (),
 // 		}
-// 	open_list.sort_by(|a, b| ((b.estimate_dst + b.actual_len).cmp(&(a.estimate_dst + a.actual_len))));
+// 	open_list.sort_by(|a, b| ((b.estimate_dst + b.actual_dst).cmp(&(a.estimate_dst + a.actual_dst))));
 // 	}
 // }
 
