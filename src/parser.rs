@@ -11,11 +11,11 @@ use crate::puzzle::Puzzle;
 pub fn get_puzzle(file_name: (bool, String)) -> Result<Puzzle, io::Error> {
 	match file_name.0 {
 		true => read_file(file_name.1),
-		false => Ok(generate_random_taquin(3)),
+		false => Ok(generate_random_puzzle(3)),
 	}
 }
 
-fn generate_random_taquin(size: u32) -> Puzzle {
+pub fn generate_random_puzzle(size: u32) -> Puzzle {
 	let mut rnd_taquin = Puzzle::gen_final_state(size as usize);
 
 	rnd_taquin.taq.shuffle(&mut thread_rng());
@@ -91,5 +91,5 @@ fn read_file(name: String) -> Result<Puzzle, io::Error> {
 	if size < 3 || v.len() != (size * size) as usize {
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Puzzle { size : size, taq : v, actual_len: -1, esimate_dst: -1 } )
+	Ok(Puzzle { size : size, taq : v, actual_len: -1, estimate_dst: -1 } )
 }

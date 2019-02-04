@@ -6,11 +6,11 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/03 22:45:15 by no               ###   ########.fr       */
+/*   Updated: 2019/02/04 01:29:21 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-use std::collections::HashMap;
+// use std::collections::HashMap;
 extern crate colored;
 // use colored::*;
 // use std::thread;
@@ -22,9 +22,8 @@ pub mod solver;
 pub mod puzzle;
 
 fn main() {
-	let ref mut close_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
-	let ref mut open_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
-	// let mut vikings = HashMap::new();
+	// let ref mut close_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
+	// let ref mut open_list: HashMap<puzzle::Puzzle, i32> = HashMap::new();
 	// let ref mut close_list: Vec<Puzzle> = Vec::new();
 	// let ref mut open_list: Vec<Puzzle> = Vec::new();
 	
@@ -42,9 +41,8 @@ fn main() {
 		println!("VALID and Soluble!");
 		puzzle.print();
 		let final_state = Puzzle::gen_final_state(puzzle.size as usize);
-		puzzle.distance_estimator(&final_state);
+		puzzle.estimate_dst = puzzle::distance_estimator(&puzzle.taq, &final_state) as i32;
 		puzzle.actual_len = 0;
-		let i = puzzle.esimate_dst;
 		// open_list.insert(puzzle, i);
 
 
@@ -53,7 +51,7 @@ fn main() {
 		// }
 		// open_list.push(puzzle.copy());
 		// solve(close_list, open_list, puzzle.size);
-		solver::solve(close_list, open_list, &mut puzzle);
+		solver::solve(&mut puzzle);
 	}
 	else {
 		println!("NOT VALID");
