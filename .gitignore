@@ -1,5 +1,8 @@
 /target
 /test/
-test*
+time_*
+test_*
 **/*.rs.bk
 npuzzle-gen.py
+
+benches/
