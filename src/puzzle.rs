@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/05 10:34:25 by no               ###   ########.fr       */
+/*   Updated: 2019/02/05 11:11:45 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -145,8 +145,7 @@ impl Puzzle {
 				cmpt += 1;
 			}
 		}
-		(heuristics::estimate_one(&self.taq, &final_state, 0, final_state.size) % 2 == cmpt % 2)
-		
+		(heuristics::estimate_one_manhattan(&self.taq, &final_state, 0, final_state.size) % 2 == cmpt % 2)		
 	}
 }
 
