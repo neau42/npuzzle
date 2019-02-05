@@ -88,7 +88,7 @@ impl Puzzle {
 	// }
 
 	fn estimate_one_puzzle(&self, final_state: &Puzzle, value: u8) -> i32 {
-		estimate_one_vect(&self.taq, final_state, value)
+		estimate_one_vect(&self.taq, final_state, value, final_state.size)
 
 		// let pos_current = self.get_pos_of_value(value);
 		// let pos_final = final_state.get_pos_of_value(value);
@@ -140,10 +140,10 @@ impl Puzzle {
 	pub fn is_soluble(&self) -> bool {
 		let mut cmpt: i32 = 0;
 		let mut vect_copy: Vec<u8> = self.taq.clone();
-		let sq: usize = (self.size * self.size) as usize;
+		let sq: usize = (self.size * self.size) as usize - 1;
 		let final_state = Puzzle::gen_final_state(self.size as usize);
 
-		for idx in 0..sq - 1 {
+		for idx in 0..sq {
 			if vect_copy[idx as usize] != final_state.taq[idx as usize] {
 				let pos = vect_copy.iter().enumerate().find(|r| *r.1 == final_state.taq[idx as usize]).unwrap().0;
 				vect_copy.swap(idx as usize, (pos) as usize);
@@ -169,20 +169,47 @@ impl Puzzle {
 	// }
 
 
-fn estimate_one_vect(taquin: & Vec<u8>, final_state: &Puzzle, value: u8) -> i32 {
+fn estimate_one_vect(taquin: & Vec<u8>, final_state: &Puzzle, value: u8, size: i32) -> i32 {
 	let pos_current = taquin.iter().position(|r| *r == value).unwrap() as i32;
 	let pos_final = final_state.get_pos_of_value(value) as i32;
+	// let 
 
-	((((pos_current % final_state.size) - (pos_final % final_state.size)) as i32).abs()
-		+ (((pos_current / final_state.size) - (pos_final / final_state.size)) as i32).abs()) as i32
+	((((pos_current % size) - (pos_final % size)) as i32).abs()
+		+ (((pos_current / size) - (pos_final / size)) as i32).abs()) as i32
 }
+
+// pub fn distance_estimator_manhattan(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
+// 	let mut cmpt: i32 = 0;
+// 	let sq: usize = (final_state.size * final_state.size) as usize;
+
+// 	for i in 0..sq - 1 {
+// 		cmpt += estimate_one_vect(taquin, &final_state, i as u8);
+// 	}
+// 	cmpt
+// }
+
+// pub fn distance_estimator_bad_place(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
+// 	let mut cmpt: i32 = 0;
+// 	let sq: usize = (final_state.size * final_state.size) as usize;
+
+// 	for i in 0..sq - 1 {
+// 		if taquin[i] != final_state.taq[i] {
+// 			cmpt += 1;
+// 		}
+// 	}
+// 	cmpt
+// }
 
 pub fn distance_estimator(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
 	let mut cmpt: i32 = 0;
-	let sq: usize = (final_state.size * final_state.size) as usize;
+	let size = final_state.size;
+	let sq: usize = (size * size) as usize - 1;
 
-	for i in 0..sq - 1 {
-		cmpt += estimate_one_vect(taquin, &final_state, i as u8);
+	for i in 0..sq {
+		cmpt += estimate_one_vect(taquin, &final_state, i as u8, size);
+		if taquin[i] != final_state.taq[i] {
+			cmpt += 1;
+		}
 	}
 	cmpt
 }
