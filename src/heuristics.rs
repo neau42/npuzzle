@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   heuristics.rs                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/05 10:34:16 by no                #+#    #+#             */
+/*   Updated: 2019/02/05 10:34:26 by no               ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 use crate::puzzle::Puzzle;
 
-pub fn estimate_one(taquin: & Vec<u8>, final_state: &Puzzle, value: u8, size: i32) -> i32 {
+pub fn estimate_one_manhattan(taquin: & Vec<u8>, final_state: &Puzzle, value: u8, size: i32) -> i32 {
 	let pos_current = taquin.iter().position(|r| *r == value).unwrap() as i32;
 	let pos_final = final_state.get_pos_of_value(value) as i32;
 
@@ -15,7 +27,7 @@ pub fn distance_estimator_manhattan(taquin: & Vec<u8>, final_state: &Puzzle) -> 
 	let sq: usize = (size) as usize;
 
 	for i in 0..sq - 1 {
-		cmpt += estimate_one(taquin, &final_state, i as u8, size);
+		cmpt += estimate_one_manhattan(taquin, &final_state, i as u8, size);
 	}
 	cmpt
 }
@@ -38,7 +50,7 @@ pub fn distance_estimator(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
 	let sq: usize = (size * size) as usize - 1;
 
 	for i in 0..sq {
-		cmpt += estimate_one(taquin, &final_state, i as u8, size);
+		cmpt += estimate_one_manhattan(taquin, &final_state, i as u8, size);
 		if taquin[i] != final_state.taq[i] {
 			cmpt += 1;
 		}
