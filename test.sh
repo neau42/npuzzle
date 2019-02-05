@@ -9,7 +9,7 @@ fi
 ls test/solvable3* test/solvable4* 1> /dev/null 2>&1
 if [ $? -ne 0 ] ; then
 	echo "need puzzle with name test/solvable3* test/solvable4*"
-	echo 'tips:\n\tfor e in {00..10} ; do 
+	echo 'tips:\n\tmkdir test;\n\tfor e in {00..10} ; do 
 		python npuzzle-gen.py 3 -s > test/solvable3_$e;
 		python npuzzle-gen.py 4 -s > test/solvable4_$e;
 	done'
