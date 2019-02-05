@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/04 03:51:57 by no               ###   ########.fr       */
+/*   Updated: 2019/02/05 06:26:25 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,14 +37,6 @@ fn main() {
 		let final_state = Puzzle::gen_final_state(puzzle.size as usize);
 		puzzle.estimate_dst = puzzle::distance_estimator(&puzzle.taq, &final_state) as i32;
 		puzzle.actual_dst = 0;
-		// open_list.insert(puzzle, i);
-
-
-		// for val in open_list.keys() {
-		// 	println!("{:?}", val);
-		// }
-		// open_list.push(puzzle.copy());
-		// solve(close_list, open_list, puzzle.size);
 		solver::solve(&mut puzzle);
 	}
 	else {

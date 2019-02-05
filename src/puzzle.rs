@@ -3,6 +3,39 @@ use std::io;
 use std::cmp::Ordering;
 
 #[derive(Debug, Eq, Hash)]
+pub struct PuzzleRes {
+    pub taq: Vec<u8>,
+	pub estimate_dst: i32,    //  H
+	pub actual_dst: i32, //  G
+	pub predecessor: Vec<u8>,
+}
+
+impl PartialEq for PuzzleRes {
+		fn eq(&self, other: &PuzzleRes) -> bool {
+			self.taq == other.taq
+		}
+	}
+
+impl PartialOrd for PuzzleRes {
+    fn partial_cmp(&self, other: &PuzzleRes) -> Option<Ordering> {
+		if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
+			return (other.actual_dst).partial_cmp(&(self.actual_dst));
+		}
+		(other.estimate_dst + other.actual_dst).partial_cmp(&(self.estimate_dst + self.actual_dst))
+	}
+}
+
+impl Ord for PuzzleRes {
+     fn cmp(&self, other: &PuzzleRes) -> Ordering {
+		if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
+			return (other.actual_dst).cmp(&(self.actual_dst));
+		}
+		(other.estimate_dst + other.actual_dst).cmp(&(self.estimate_dst + self.actual_dst))
+	}
+}
+
+
+#[derive(Debug, Eq, Hash)]
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u8>,
