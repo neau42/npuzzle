@@ -8,6 +8,7 @@ use rand::thread_rng;
 use rand::seq::SliceRandom;
 use crate::puzzle::Puzzle;
 
+
 pub fn get_puzzle(file_name: (bool, String)) -> Result<Puzzle, io::Error> {
 	match file_name.0 {
 		true => read_file(file_name.1),

@@ -1,6 +1,7 @@
-use std::io::ErrorKind as IoErr;
 use std::io;
+use std::io::ErrorKind as IoErr;
 use std::cmp::Ordering;
+use crate::heuristics;
 
 #[derive(Debug, Eq, Hash)]
 pub struct PuzzleRes {
@@ -34,14 +35,12 @@ impl Ord for PuzzleRes {
 	}
 }
 
-
 #[derive(Debug, Eq, Hash)]
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u8>,
 	pub actual_dst: i32, //  G
 	pub estimate_dst: i32,    //  H
-	// dst:i32,
 }
 
 impl PartialEq for Puzzle {
@@ -68,14 +67,7 @@ impl Puzzle {
 	}
 
 	pub fn copy(&self) -> Puzzle {
-		let sq: usize = (self.size * self.size) as usize;
-		let mut v: Vec<u8> = Vec::new();
-
-		for i in 0..sq {
-			v.push(self.taq[i]);
-		}
-		Puzzle::new(self.size, v, self.actual_dst, self.estimate_dst)
-		// Puzzle { size: self.size as i32, taq : v, actual_dst: self.actual_dst, estimate_dst: self.estimate_dst }
+		Puzzle { size: self.size as i32, taq : self.taq.clone(), actual_dst: self.actual_dst, estimate_dst: self.estimate_dst }
 	}
 
 	pub fn gen_final_state(size: usize) -> Puzzle {
@@ -112,48 +104,6 @@ impl Puzzle {
 		self.taq.iter().position(|r| *r == value).unwrap() as u8
 	}
 
-	// fn get_pos_x_of_idx(&self, idx: u8) -> u8 {
-	// 	idx % self.size as u8
-	// }
-
-	// fn get_pos_y_of_idx(&self, idx: u8) -> u8 {
-	// 	 idx / self.size as u8
-	// }
-
-	fn estimate_one_puzzle(&self, final_state: &Puzzle, value: u8) -> i32 {
-		estimate_one_vect(&self.taq, final_state, value, final_state.size)
-
-		// let pos_current = self.get_pos_of_value(value);
-		// let pos_final = final_state.get_pos_of_value(value);
-
-		// ((self.get_pos_x_of_idx(pos_current) as i32 - final_state.get_pos_x_of_idx(pos_final) as i32).abs()
-		// + (self.get_pos_y_of_idx(pos_current) as i32 - final_state.get_pos_y_of_idx(pos_final) as i32).abs()) as u8
-	}
-
-	// pub fn distance_estimator(&mut self, final_state: &Puzzle) {
-	// 	let mut cmpt: u8 = 0;
-	// 	let sq: usize = (self.size * self.size) as usize;
-
-	// 	for i in 0..sq - 1 {
-	// 		cmpt += self.estimate_one_puzzle(&final_state, i as u8);
-	// 	}
-	// 	self.estimate_dst = cmpt as i32;
-	// 	// cmpt
-	// }
-
-	pub fn print(&self) {
-		let sq: usize = (self.size * self.size) as usize;
-
-		for i in 0..sq {
-			print!("{number:>width$} ", number=self.taq[i], width=2);
-			if i % (self.size as usize) == self.size as usize - 1 {
-				print!("\n");
-			}
-		}
-		println!("> H: ({}) G: ({}) F: ({})", self.estimate_dst, self.actual_dst, self.actual_dst + self.estimate_dst);
-		print!("\n");
-	}
-
 	pub fn is_valid(&self) -> bool {
 		let sq: u8 = (self.size * self.size) as u8;
 		let mut v: Vec<u8> = Vec::new();
@@ -183,68 +133,9 @@ impl Puzzle {
 				cmpt += 1;
 			}
 		}
-		(self.estimate_one_puzzle(&final_state, 0) % 2 == cmpt % 2)
+		(heuristics::estimate_one(&self.taq, &final_state, 0, final_state.size) % 2 == cmpt % 2)
+		
 	}
-}
-
-
-
-	// pub fn get_pos_of_value(&self, value: u8) -> u8 {
-	// 	self.taq.iter().position(|r| *r == value).unwrap() as u8
-	// }
-
-	// fn get_pos_x_of_idx(&self, idx: u8) -> u8 {
-	// 	idx % self.size as u8
-	// }
-
-	// fn get_pos_y_of_idx(&self, idx: u8) -> u8 {
-	// 	 idx / self.size as u8
-	// }
-
-
-fn estimate_one_vect(taquin: & Vec<u8>, final_state: &Puzzle, value: u8, size: i32) -> i32 {
-	let pos_current = taquin.iter().position(|r| *r == value).unwrap() as i32;
-	let pos_final = final_state.get_pos_of_value(value) as i32;
-	// let 
-
-	((((pos_current % size) - (pos_final % size)) as i32).abs()
-		+ (((pos_current / size) - (pos_final / size)) as i32).abs()) as i32
-}
-
-// pub fn distance_estimator_manhattan(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
-// 	let mut cmpt: i32 = 0;
-// 	let sq: usize = (final_state.size * final_state.size) as usize;
-
-// 	for i in 0..sq - 1 {
-// 		cmpt += estimate_one_vect(taquin, &final_state, i as u8);
-// 	}
-// 	cmpt
-// }
-
-// pub fn distance_estimator_bad_place(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
-// 	let mut cmpt: i32 = 0;
-// 	let sq: usize = (final_state.size * final_state.size) as usize;
-
-// 	for i in 0..sq - 1 {
-// 		if taquin[i] != final_state.taq[i] {
-// 			cmpt += 1;
-// 		}
-// 	}
-// 	cmpt
-// }
-
-pub fn distance_estimator(taquin: & Vec<u8>, final_state: &Puzzle) -> i32 {
-	let mut cmpt: i32 = 0;
-	let size = final_state.size;
-	let sq: usize = (size * size) as usize - 1;
-
-	for i in 0..sq {
-		cmpt += estimate_one_vect(taquin, &final_state, i as u8, size);
-		if taquin[i] != final_state.taq[i] {
-			cmpt += 1;
-		}
-	}
-	cmpt
 }
 
 pub fn move_left(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8>, io::Error> {
@@ -283,52 +174,13 @@ pub fn move_down(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<
 }
 
 pub fn print_puzzle(taquin: & Vec<u8>, size: usize) {
-		let sq: usize = (size * size) as usize;
+	let sq: usize = (size * size) as usize;
 
-		for i in 0..sq {
-			print!("{number:>width$} ", number=taquin[i], width=2);
-			if i % (size as usize) == size as usize - 1 {
-				print!("\n");
-			}
+	for i in 0..sq {
+		print!("{number:>width$} ", number=taquin[i], width=2);
+		if i % (size as usize) == size as usize - 1 {
+			print!("\n");
 		}
-		print!("\n");
-		// println!("> H: ({}) G: ({}) F: ({})", self.estimate_dst, self.actual_dst, self.actual_dst + self.estimate_dst);
 	}
-
-
-	// pub fn move_left(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
-	// 	if !(zero_pos % self.size as usize  == self.size as usize - 1) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
-	// 		new_taquin.taq.swap(zero_pos, zero_pos + 1);
-	// 		return Ok(new_taquin);
-	// 	}
-	// 	Err(std::io::Error::new(IoErr::Other, "_"))
-	// }
-
-	// pub fn move_right(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
-	// 	if !(zero_pos % self.size as usize  == 0) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
-	// 		new_taquin.taq.swap(zero_pos, zero_pos - 1);
-	// 		return Ok(new_taquin);
-	// 	}
-	// 	Err(std::io::Error::new(IoErr::Other, "_"))
-	// }
-
-	// pub fn move_down(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
-	// 	if !(zero_pos < self.size as usize) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
-	// 		new_taquin.taq.swap(zero_pos, zero_pos - self.size as usize);
-	// 		return Ok(new_taquin);
-	// 	}
-	// 	Err(std::io::Error::new(IoErr::Other, "_"))
-	// }
-
-	// pub fn move_up(&self, zero_pos: usize) -> Result<Puzzle, io::Error> {
-	// 	if !(zero_pos >= (self.size * self.size - self.size) as usize) {
-	// 		let mut new_taquin = Puzzle{ size: self.size as i32, taq : self.taq.clone(), actual_dst: -1, estimate_dst: -1 };
-	// 		new_taquin.taq.swap(zero_pos, zero_pos + self.size as usize);
-	// 		return Ok(new_taquin);
-	// 	}
-	// 	Err(std::io::Error::new(IoErr::Other, "_"))
-	// }
-
+	print!("\n");
+}
