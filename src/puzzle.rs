@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/05 11:11:45 by no               ###   ########.fr       */
+/*   Updated: 2019/02/05 17:13:44 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ impl PartialEq for PuzzleRes {
 impl PartialOrd for PuzzleRes {
     fn partial_cmp(&self, other: &PuzzleRes) -> Option<Ordering> {
 		if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
-			return (other.actual_dst).partial_cmp(&(self.actual_dst));
+			return (self.actual_dst).partial_cmp(&(other.actual_dst));
 		}
 		(other.estimate_dst + other.actual_dst).partial_cmp(&(self.estimate_dst + self.actual_dst))
 	}
@@ -41,36 +41,18 @@ impl PartialOrd for PuzzleRes {
 impl Ord for PuzzleRes {
      fn cmp(&self, other: &PuzzleRes) -> Ordering {
 		if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
-			return (other.actual_dst).cmp(&(self.actual_dst));
+			return (self.actual_dst).cmp(&(other.actual_dst));
 		}
 		(other.estimate_dst + other.actual_dst).cmp(&(self.estimate_dst + self.actual_dst))
 	}
 }
 
-#[derive(Debug, Eq, Hash)]
+#[derive(Debug, Hash)]
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u8>,
 	pub actual_dst: i32, //  G
 	pub estimate_dst: i32,    //  H
-}
-
-impl PartialEq for Puzzle {
-		fn eq(&self, other: &Puzzle) -> bool {
-			self.taq == other.taq
-		}
-	}
-
-impl PartialOrd for Puzzle {
-    fn partial_cmp(&self, other: &Puzzle) -> Option<Ordering> {
-		(self.estimate_dst + self.actual_dst).partial_cmp(&(other.estimate_dst + other.actual_dst))
-    }
-}
-
-impl Ord for Puzzle {
-    fn cmp(&self, other: &Puzzle) -> Ordering {
-		(self.estimate_dst + self.actual_dst).cmp(&(other.estimate_dst + other.actual_dst))
-    }
 }
 
 impl Puzzle {
@@ -132,22 +114,41 @@ impl Puzzle {
 		true
 	}
 
-	pub fn is_soluble(&self) -> bool {
+	pub fn is_soluble(&self, final_state: &FinalPuzzle) -> bool {
 		let mut cmpt: i32 = 0;
 		let mut vect_copy: Vec<u8> = self.taq.clone();
 		let sq: usize = (self.size * self.size) as usize - 1;
-		let final_state = Puzzle::gen_final_state(self.size as usize);
 
 		for idx in 0..sq {
-			if vect_copy[idx as usize] != final_state.taq[idx as usize] {
-				let pos = vect_copy.iter().enumerate().find(|r| *r.1 == final_state.taq[idx as usize]).unwrap().0;
+			if vect_copy[idx as usize] != final_state.puzzle[idx as usize] {
+				let pos = vect_copy.iter().enumerate().find(|r| *r.1 == final_state.puzzle[idx as usize]).unwrap().0;
 				vect_copy.swap(idx as usize, (pos) as usize);
 				cmpt += 1;
 			}
 		}
-		(heuristics::estimate_one_manhattan(&self.taq, &final_state, 0, final_state.size) % 2 == cmpt % 2)		
+		(heuristics::estimate_one_manhattan(&self.taq, final_state, 0, final_state.size) % 2 == cmpt % 2)		
 	}
 }
+
+#[derive(Debug)]
+pub struct FinalPuzzle {
+	pub size: i32,
+    pub puzzle: Vec<u8>,
+	pub position: Vec<u8>,
+	// pub puzzle: Puzzle,
+}
+
+pub fn init_final_stat(size: usize) -> FinalPuzzle {
+	let puzzle = Puzzle::gen_final_state(size);
+	let sq: u8 = (size * size) as u8;
+	let mut position: Vec<u8> = vec![0; sq as usize];
+
+	for i in 0..sq {
+		position[i as usize] = puzzle.get_pos_of_value(i);
+	}
+	FinalPuzzle { size: size as i32, puzzle: puzzle.taq, position }
+}
+
 
 pub fn move_left(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8>, io::Error> {
 	if !(zero_pos % size == size - 1) {

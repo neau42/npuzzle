@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:10 by no                #+#    #+#             */
-/*   Updated: 2019/02/05 10:34:27 by no               ###   ########.fr       */
+/*   Updated: 2019/02/05 17:18:01 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ use crate::puzzle;
 use crate::puzzle::Puzzle;
 use crate::puzzle::PuzzleRes;
 
-fn update_open_list(puzzle: & Puzzle, open_list: &mut  BinaryHeap<PuzzleRes> , final_state: & Puzzle, all_list: &mut HashSet<Vec<u8>>) {
+fn update_open_list(puzzle: & Puzzle, open_list: &mut  BinaryHeap<PuzzleRes> , final_state: & puzzle::FinalPuzzle, all_list: &mut HashSet<Vec<u8>>) {
 	let zero_pos = puzzle.get_pos_of_value(0) as usize;
 	static MOVE_FUNCTIONS: &[ fn(&Vec<u8>, usize, usize) -> Result<Vec<u8>, io::Error>; 4] =
 		&[puzzle::move_up, puzzle::move_down, puzzle::move_left, puzzle::move_right];
@@ -66,9 +66,15 @@ fn print_all(puzzle: &mut Puzzle, close_list: &HashMap<Vec<u8>, (i32, i32, Vec<u
 	i
 }
 
-pub fn solve(puzzle: &mut Puzzle) {
-	let final_state = Puzzle::gen_final_state(puzzle.size as usize);
+// key: estimate_dst1 = value: (puzzle1: {} , puzzle3, puzzle12, puzzle6)
+// key: estimate_dst2 = value: (puzzle2, puzzle8, puzzle9, puzzle11)
+// key: estimate_dst3 = value: (puzzle5, puzzle7, puzzle10, puzzle12)
+// key: estimate_dst4 = value: (puzzle4, puzzle13, puzzle14, puzzle15)
+
+
+pub fn solve(puzzle: &mut Puzzle, final_state: &puzzle::FinalPuzzle) {
 	let mut close_list: HashMap<Vec<u8>, (i32, i32, Vec<u8>)> = HashMap::new();
+	// let mut test: HashMap<Vec<u8>, Vec<u8>> = HashMap::new();
 	let mut open_list: BinaryHeap<PuzzleRes>  = BinaryHeap::new();
 	let mut all_list: HashSet<Vec<u8>> = HashSet::new();
 
@@ -82,7 +88,7 @@ pub fn solve(puzzle: &mut Puzzle) {
 
 	while puzzle.estimate_dst != 0 {
 		c_list.insert(puzzle.taq.clone(), (puzzle.estimate_dst, puzzle.actual_dst, next.predecessor.clone()));
-		update_open_list(puzzle, o_list, &final_state, a_list);
+		update_open_list(puzzle, o_list, final_state, a_list);
 		next = o_list.pop().unwrap();
 		puzzle.taq = next.taq;
 		puzzle.actual_dst = next.actual_dst;
