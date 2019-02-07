@@ -1,8 +1,9 @@
 #!/bin/zsh
-if [ $# -ne 1 ] || [[ ! $1 =~ ^(3|4)$ ]] ; then
-	echo "usage:\t$0 <3|4>\n
-\t$0 3 (test puzzles 3x3)
-\t$0 4 (test puzzles 4x4)"
+if [ $# -ne 1 ] || [[ ! $1 =~ ^(2|3|4)$ ]] ; then
+	echo "usage:\t$0 <2|3|4>\n
+\t$0 2 (test puzzles 2x2 (test/solvable2_*))
+\t$0 3 (test puzzles 3x3 (test/solvable3_*))
+\t$0 4 (test puzzles 4x4 (test/solvable4_*))"
 	exit 1
 fi
 
@@ -17,10 +18,11 @@ if [ $? -ne 0 ] ; then
 fi
 
 cargo build --release
-LOG_WORDS="len\|cpu\|number\|state"
+LOG_WORDS="len\|cpu\|number\|state\|movements\|time"
 COMMIT_ID="`git rev-parse master | head -c 8`"
 TIME="`date +"%s"`"
-FILE_NAME="time_test_$1_${TIME}:${COMMIT_ID}.log"
+FILE_NAME=".log/time_test_$1_${TIME}:${COMMIT_ID}.log"
+mkdir -p ".log"
 
 echo "#########################################################################" > ${FILE_NAME}
 echo "# commit: ${COMMIT_ID}" >> ${FILE_NAME}

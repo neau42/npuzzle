@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/05 17:13:44 by no               ###   ########.fr       */
+/*   Updated: 2019/02/06 07:23:52 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,6 @@ pub struct FinalPuzzle {
 	pub size: i32,
     pub puzzle: Vec<u8>,
 	pub position: Vec<u8>,
-	// pub puzzle: Puzzle,
 }
 
 pub fn init_final_stat(size: usize) -> FinalPuzzle {
@@ -185,11 +184,21 @@ pub fn move_down(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
 
-pub fn print_puzzle(taquin: & Vec<u8>, size: usize) {
+pub fn print_puzzle(taquin: & Vec<u8>, size: usize, final_state: &FinalPuzzle) {
 	let sq: usize = (size * size) as usize;
 
 	for i in 0..sq {
+		if taquin[i] == 0 {
+			;
+		}
+		else if final_state.position[taquin[i] as usize] == i as u8 {
+			print!("{}[92m", 27 as char);
+		}
+		else {
+			print!("{}[91m", 27 as char);
+		}
 		print!("{number:>width$} ", number=taquin[i], width=2);
+		print!("{}[0m", 27 as char);
 		if i % (size as usize) == size as usize - 1 {
 			print!("\n");
 		}

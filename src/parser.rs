@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:15 by no                #+#    #+#             */
-/*   Updated: 2019/02/05 10:34:26 by no               ###   ########.fr       */
+/*   Updated: 2019/02/07 10:38:03 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,12 @@ use std::io::ErrorKind as IoErr;
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 use crate::puzzle::Puzzle;
+use crate::options::Options;
+use crate::options::HeuristicType;
 
-
-pub fn get_puzzle(file_name: (bool, String)) -> Result<Puzzle, io::Error> {
-	match file_name.0 {
-		true => read_file(file_name.1),
+pub fn get_puzzle(opts: & Options) -> Result<Puzzle, io::Error> {
+	match opts.file_name_present {
+		true => read_file(&opts.file_name),
 		false => Ok(generate_random_puzzle(3)),
 	}
 }
@@ -35,17 +36,35 @@ pub fn generate_random_puzzle(size: u32) -> Puzzle {
 	rnd_taquin
 }
 
-pub fn get_arg() -> (bool, String) {
-	let r: Vec<String> = env::args().collect();
+fn get_opts(opts: &mut Options, s: &str) -> bool {
+	match s {
+		"-g" => opts.greedy = true,
+		"-c" => opts.color = true,
+		"-s" => opts.sleep = true,
+		"-M" => opts.heuristic = HeuristicType::Manhattan,
+		"-H" => opts.heuristic = HeuristicType::Hamming,
+		"-L" => opts.heuristic = HeuristicType::Linear,
+		"-C" => opts.heuristic = HeuristicType::Combine,
+		_ => return false,
+	}
+	true
+}
 
-	if r.len() > 2 {
-		eprintln!("usage: {} [file_name]", &r[0]);
-		process::exit(0);
+pub fn get_arg() -> Options {
+	let args: Vec<String> = env::args().collect();
+	let args: &[String] = &args[1..];
+	let mut options = Options::new();
+	let ref mut opts = options;
+
+	
+	for elem in args {
+		if !get_opts(opts, &elem) {
+			opts.file_name = elem.clone();
+			opts.file_name_present = true;
+			break ;
+		}
 	}
-	if r.len() < 2 {
-		return (false, "".to_string());
-	}
-	(true, r[1].clone())
+	options
 }
 
 fn get_size(line: String) -> Option<i32> {
@@ -72,7 +91,7 @@ fn get_size(line: String) -> Option<i32> {
 	size
 }
 
-fn read_file(name: String) -> Result<Puzzle, io::Error> {
+fn read_file(name: &String) -> Result<Puzzle, io::Error> {
 	let mut v: Vec<u8> = Vec::new();
 	let file = File::open(name)?;
 	let mut size_opt = None;
@@ -80,8 +99,11 @@ fn read_file(name: String) -> Result<Puzzle, io::Error> {
 
 	for line in BufReader::new(file).lines() {
 		let line = match line {
-			Ok(l) => l,
-			Err(_) => return Err(std::io::Error::new(IoErr::Other, "unable to read file")),
+			Ok(l) => {
+			println!(">>> {}", l);
+				l
+			}
+			Err(e) => return Err(e),
 		};
 		if size_opt == None {
 			size_opt = get_size(line);
@@ -101,8 +123,8 @@ fn read_file(name: String) -> Result<Puzzle, io::Error> {
 			}
 		}
 	}
-	if size < 3 || v.len() != (size * size) as usize {
+	if size < 2 || size > 15 || v.len() != (size * size) as usize { // SIZE <= 15 || u8 -> u16 ;(
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Puzzle { size : size, taq : v, actual_dst: -1, estimate_dst: -1 } )
+	Ok(Puzzle { size : size, taq : v, actual_dst: 0, estimate_dst: -1 } )
 }
