@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/06 07:23:52 by no               ###   ########.fr       */
+/*   Updated: 2019/02/09 15:41:09 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,15 @@ use std::io;
 use std::io::ErrorKind as IoErr;
 use std::cmp::Ordering;
 use crate::heuristics;
+use crate::options::Options;
+
 
 #[derive(Debug, Eq, Hash)]
 pub struct PuzzleRes {
-    pub taq: Vec<u8>,
-	pub estimate_dst: i32,    //  H
-	pub actual_dst: i32, //  G
-	pub predecessor: Vec<u8>,
+    pub taq: Vec<u16>,
+	pub estimate_dst: i32,
+	pub actual_dst: i32,
+	pub predecessor: Vec<u16>,
 }
 
 impl PartialEq for PuzzleRes {
@@ -31,18 +33,18 @@ impl PartialEq for PuzzleRes {
 
 impl PartialOrd for PuzzleRes {
     fn partial_cmp(&self, other: &PuzzleRes) -> Option<Ordering> {
-		if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
-			return (self.actual_dst).partial_cmp(&(other.actual_dst));
-		}
+		// if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
+		// 	return (self.actual_dst).partial_cmp(&(other.actual_dst));
+		// }
 		(other.estimate_dst + other.actual_dst).partial_cmp(&(self.estimate_dst + self.actual_dst))
 	}
 }
 
 impl Ord for PuzzleRes {
      fn cmp(&self, other: &PuzzleRes) -> Ordering {
-		if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
-			return (self.actual_dst).cmp(&(other.actual_dst));
-		}
+		// if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
+		// 	return (self.actual_dst).cmp(&(other.actual_dst));
+		// }
 		(other.estimate_dst + other.actual_dst).cmp(&(self.estimate_dst + self.actual_dst))
 	}
 }
@@ -50,13 +52,13 @@ impl Ord for PuzzleRes {
 #[derive(Debug, Hash)]
 pub struct Puzzle {
     pub size: i32,
-    pub taq: Vec<u8>,
-	pub actual_dst: i32, //  G
-	pub estimate_dst: i32,    //  H
+    pub taq: Vec<u16>,
+	pub actual_dst: i32,
+	pub estimate_dst: i32,
 }
 
 impl Puzzle {
-	pub fn new(size: i32, taq: Vec<u8>, actual_dst: i32, estimate_dst: i32) -> Puzzle {
+	pub fn new(size: i32, taq: Vec<u16>, actual_dst: i32, estimate_dst: i32) -> Puzzle {
 		Puzzle { size, taq, actual_dst, estimate_dst}
 	}
 
@@ -88,19 +90,19 @@ impl Puzzle {
 				(false, false) => index + size as i32,
 				(false, true)  => index - size as i32,
 			};
-			v[index as usize] = value as u8;
+			v[index as usize] = value as u16;
 			cmpt -= 1;
 		}
 		Puzzle { size: size as i32, taq : v, actual_dst: -1, estimate_dst: 0 }
 	}
 
-	pub fn get_pos_of_value(&self, value: u8) -> u8 {
-		self.taq.iter().position(|r| *r == value).unwrap() as u8
+	pub fn get_pos_of_value(&self, value: u16) -> u16 {
+		self.taq.iter().position(|r| *r == value).unwrap() as u16
 	}
 
 	pub fn is_valid(&self) -> bool {
-		let sq: u8 = (self.size * self.size) as u8;
-		let mut v: Vec<u8> = Vec::new();
+		let sq: u16 = (self.size * self.size) as u16;
+		let mut v: Vec<u16> = Vec::new();
 
 		if self.taq.len() != sq as usize {
 			return false;
@@ -116,7 +118,7 @@ impl Puzzle {
 
 	pub fn is_soluble(&self, final_state: &FinalPuzzle) -> bool {
 		let mut cmpt: i32 = 0;
-		let mut vect_copy: Vec<u8> = self.taq.clone();
+		let mut vect_copy: Vec<u16> = self.taq.clone();
 		let sq: usize = (self.size * self.size) as usize - 1;
 
 		for idx in 0..sq {
@@ -133,14 +135,14 @@ impl Puzzle {
 #[derive(Debug)]
 pub struct FinalPuzzle {
 	pub size: i32,
-    pub puzzle: Vec<u8>,
-	pub position: Vec<u8>,
+    pub puzzle: Vec<u16>,
+	pub position: Vec<u16>,
 }
 
 pub fn init_final_stat(size: usize) -> FinalPuzzle {
 	let puzzle = Puzzle::gen_final_state(size);
-	let sq: u8 = (size * size) as u8;
-	let mut position: Vec<u8> = vec![0; sq as usize];
+	let sq: u16 = (size * size) as u16;
+	let mut position: Vec<u16> = vec![0; sq as usize];
 
 	for i in 0..sq {
 		position[i as usize] = puzzle.get_pos_of_value(i);
@@ -149,7 +151,7 @@ pub fn init_final_stat(size: usize) -> FinalPuzzle {
 }
 
 
-pub fn move_left(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8>, io::Error> {
+pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
 	if !(zero_pos % size == size - 1) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos + 1);
@@ -158,7 +160,7 @@ pub fn move_left(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<
 	Err(std::io::Error::new(IoErr::Other, "unable to move left"))
 }
 
-pub fn move_right(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8>, io::Error> {
+pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
 	if !(zero_pos % size == 0) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos - 1);
@@ -166,7 +168,7 @@ pub fn move_right(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move right"))
 }
-pub fn move_up(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8>, io::Error> {
+pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
 	if !(zero_pos >= size * size - size) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos + size);
@@ -175,7 +177,7 @@ pub fn move_up(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8
 	Err(std::io::Error::new(IoErr::Other, "unable to move up"))
 }
 
-pub fn move_down(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<u8>, io::Error> {
+pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
 	if !(zero_pos < size) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos - size);
@@ -184,18 +186,19 @@ pub fn move_down(taquin: & Vec<u8>, zero_pos: usize, size: usize) -> Result<Vec<
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
 
-pub fn print_puzzle(taquin: & Vec<u8>, size: usize, final_state: &FinalPuzzle) {
+pub fn print_puzzle(taquin: & Vec<u16>, size: usize, final_state: &FinalPuzzle, opts: &Options) {
 	let sq: usize = (size * size) as usize;
 
 	for i in 0..sq {
-		if taquin[i] == 0 {
-			;
-		}
-		else if final_state.position[taquin[i] as usize] == i as u8 {
-			print!("{}[92m", 27 as char);
-		}
-		else {
-			print!("{}[91m", 27 as char);
+		if opts.color {
+		
+			if taquin[i] == 0 {}
+			else if final_state.position[taquin[i] as usize] == i as u16 {
+				print!("{}[92m", 27 as char);
+			}
+			else {
+				print!("{}[91m", 27 as char);
+			}
 		}
 		print!("{number:>width$} ", number=taquin[i], width=2);
 		print!("{}[0m", 27 as char);

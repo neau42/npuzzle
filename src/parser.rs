@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:15 by no                #+#    #+#             */
-/*   Updated: 2019/02/07 10:38:03 by no               ###   ########.fr       */
+/*   Updated: 2019/02/09 12:51:54 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,13 +38,13 @@ pub fn generate_random_puzzle(size: u32) -> Puzzle {
 
 fn get_opts(opts: &mut Options, s: &str) -> bool {
 	match s {
-		"-g" => opts.greedy = true,
 		"-c" => opts.color = true,
-		"-s" => opts.sleep = true,
-		"-M" => opts.heuristic = HeuristicType::Manhattan,
+		"-g" => opts.greedy = true,
 		"-H" => opts.heuristic = HeuristicType::Hamming,
 		"-L" => opts.heuristic = HeuristicType::Linear,
+		"-M" => opts.heuristic = HeuristicType::Manhattan,
 		"-C" => opts.heuristic = HeuristicType::Combine,
+		"-s" => opts.sleep = true,
 		_ => return false,
 	}
 	true
@@ -56,7 +56,6 @@ pub fn get_arg() -> Options {
 	let mut options = Options::new();
 	let ref mut opts = options;
 
-	
 	for elem in args {
 		if !get_opts(opts, &elem) {
 			opts.file_name = elem.clone();
@@ -92,17 +91,14 @@ fn get_size(line: String) -> Option<i32> {
 }
 
 fn read_file(name: &String) -> Result<Puzzle, io::Error> {
-	let mut v: Vec<u8> = Vec::new();
 	let file = File::open(name)?;
+	let mut v: Vec<u16> = Vec::new();
 	let mut size_opt = None;
 	let mut size = 0;
 
 	for line in BufReader::new(file).lines() {
 		let line = match line {
-			Ok(l) => {
-			println!(">>> {}", l);
-				l
-			}
+			Ok(l) => l,
 			Err(e) => return Err(e),
 		};
 		if size_opt == None {
@@ -119,11 +115,11 @@ fn read_file(name: &String) -> Result<Puzzle, io::Error> {
 				if count > size || e.parse::<u32>().is_err() {
 					return Err(std::io::Error::new(IoErr::Other, "Bad format"));
 				}
-				v.push(e.parse::<u8>().unwrap());
+				v.push(e.parse::<u16>().unwrap());
 			}
 		}
 	}
-	if size < 2 || size > 15 || v.len() != (size * size) as usize { // SIZE <= 15 || u8 -> u16 ;(
+	if size < 2 || size > 17 || v.len() != (size * size) as usize { // SIZE <= 15 || u16 -> u16 ;(
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
 	Ok(Puzzle { size : size, taq : v, actual_dst: 0, estimate_dst: -1 } )

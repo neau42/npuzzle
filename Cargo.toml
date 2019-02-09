@@ -6,7 +6,6 @@ edition = "2018"
 
 [dependencies]
 rand = "0.6.5"
-# colored = "1.7"
 termion = "1.5.1"
 
 # [dev-dependencies]
