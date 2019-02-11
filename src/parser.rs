@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:15 by no                #+#    #+#             */
-/*   Updated: 2019/02/09 12:51:54 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 16:32:24 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,5 +122,5 @@ fn read_file(name: &String) -> Result<Puzzle, io::Error> {
 	if size < 2 || size > 17 || v.len() != (size * size) as usize { // SIZE <= 15 || u16 -> u16 ;(
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Puzzle { size : size, taq : v, actual_dst: 0, estimate_dst: -1 } )
+	Ok(Puzzle { size : size, taq : v }) //, actual_dst: 0, estimate_dst: -1 } )
 }

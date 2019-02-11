@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 14:19:41 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 16:55:03 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,17 +53,17 @@ impl Ord for PuzzleRes {
 pub struct Puzzle {
     pub size: i32,
     pub taq: Vec<u16>,
-	pub actual_dst: i32,
-	pub estimate_dst: i32,
+	// pub actual_dst: i32,
+	// pub estimate_dst: i32,
 }
 
 impl Puzzle {
-	pub fn new(size: i32, taq: Vec<u16>, actual_dst: i32, estimate_dst: i32) -> Puzzle {
-		Puzzle { size, taq, actual_dst, estimate_dst}
+	pub fn new(size: i32, taq: Vec<u16>) -> Puzzle { //}, actual_dst: i32, estimate_dst: i32) -> Puzzle {
+		Puzzle { size, taq } //, actual_dst, estimate_dst}
 	}
 
 	pub fn copy(&self) -> Puzzle {
-		Puzzle { size: self.size as i32, taq : self.taq.clone(), actual_dst: self.actual_dst, estimate_dst: self.estimate_dst }
+		Puzzle { size: self.size as i32, taq : self.taq.clone() } //, actual_dst: self.actual_dst, estimate_dst: self.estimate_dst }
 	}
 
 	pub fn gen_final_state(size: usize) -> Puzzle {
@@ -93,7 +93,7 @@ impl Puzzle {
 			v[index as usize] = value as u16;
 			cmpt -= 1;
 		}
-		Puzzle { size: size as i32, taq : v, actual_dst: -1, estimate_dst: 0 }
+		Puzzle { size: size as i32, taq : v}//, actual_dst: -1, estimate_dst: 0 }
 	}
 
 	pub fn get_pos_of_value(&self, value: u16) -> u16 {
@@ -186,7 +186,8 @@ pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
 
-pub fn print_puzzle(taquin: & Vec<u16>, size: usize, final_state: &FinalPuzzle, opts: &Options) {
+pub fn print_puzzle(taquin: & Vec<u16>, final_state: &FinalPuzzle, opts: &Options) {
+	let size = final_state.size;
 	let sq: usize = (size * size) as usize;
 
 	for i in 0..sq {

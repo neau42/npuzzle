@@ -1,24 +1,26 @@
 use std::collections::HashMap;
 use crate::puzzle;
-use crate::puzzle::Puzzle;
+// use crate::puzzle::Puzzle;
 use std::thread;
 use std::time;
 extern crate termion;
 use crate::options::Options;
 
 
-pub fn	print_all(puzzle: &mut Puzzle, close_list: &HashMap<Vec<u16>, (i32, i32, Vec<u16>)>,
-		size: i32, mut predecessor: Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) -> u32 {
+pub fn	print_all(p: & Vec<u16>, close_list: &HashMap<Vec<u16>, (i32, i32, Vec<u16>)>,
+prev: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) -> u32 {
 
 	let ref mut end: Vec<Vec<u16>> = Vec::new();
 	let mut len: u32 = 0;
+	let mut puzzle = p;
+	let mut predecessor = prev;
 
 	loop {
-		end.push(puzzle.taq.clone());
-		puzzle.taq = predecessor.clone();
-		predecessor = match close_list.get(&predecessor) {
-			Some(x) => x.2.clone(),
-			_ => break,
+		end.push((*puzzle).clone());
+		puzzle = predecessor;
+		predecessor = match close_list.get(predecessor) {
+			Some(x) => &x.2,
+			_       => break,
 		};
 		len += 1;
 	}
@@ -26,13 +28,13 @@ pub fn	print_all(puzzle: &mut Puzzle, close_list: &HashMap<Vec<u16>, (i32, i32, 
 	loop {
 		elem = match end.pop() {
 			Some(x) => x,
-			_ => break, 
+			_       => break, 
 		};
 		if opts.sleep {
 			println!("{}[2J{}",27 as char , termion::cursor::Goto(1, 1));
 		}
 		println!("N-puzzle: ");
-		puzzle::print_puzzle(&elem, size as usize, final_state, opts);
+		puzzle::print_puzzle(&elem, final_state, opts);
 		if opts.sleep {
 			thread::sleep(time::Duration::from_millis(200));
 		}

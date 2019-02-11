@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/07 18:46:01 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 17:24:53 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,9 +49,7 @@ fn main() {
 		let final_state: puzzle::FinalPuzzle = puzzle::init_final_stat(puzzle.size as usize);
 		if puzzle.is_soluble(&final_state) {
 			println!("puzzle solvable");
-			// puzzle.estimate_dst = heuristics::distance_estimator(&puzzle.taq, &final_state) as i32;
-			// puzzle.actual_dst = 0;
-			solver::solve(&mut puzzle, &final_state, opts);
+			solver::solve(&mut puzzle.taq, &final_state, &opts);
 		} else {
 			eprintln!("puzzle not solvable");
 		}
