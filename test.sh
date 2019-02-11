@@ -29,7 +29,7 @@ echo "# commit: ${COMMIT_ID}" >> ${FILE_NAME}
 echo "#" >> ${FILE_NAME}
 echo "# for e in \`ls test/solvable$1\*\` ; do" >> ${FILE_NAME}
 echo "#	echo \"\\\n\$e:\" ;" >> ${FILE_NAME}
-echo "#	{ TIME ./target/release/npuzzle $e } 2>&1 | grep -i \"${LOG_WORDS}\";" >> ${FILE_NAME}
+echo "#	{ TIME ./target/release/npuzzle -L $e } 2>&1 | grep -i \"${LOG_WORDS}\";" >> ${FILE_NAME}
 echo '# done  > ${FILE_NAME}' >> ${FILE_NAME}
 echo "#" >> ${FILE_NAME}
 echo "#" >> ${FILE_NAME}
@@ -38,7 +38,7 @@ echo "#########################################################################\
 
 for e in `ls test/solvable$1*` ; do
 	echo "\n$e:" ;
-	{ time ./target/release/npuzzle $e } 2>&1 | grep -i "${LOG_WORDS}";
+	{ time ./target/release/npuzzle  -L $e } 2>&1 | grep -i "${LOG_WORDS}";
  done >> ${FILE_NAME}
 
 echo "${FILE_NAME} generate"

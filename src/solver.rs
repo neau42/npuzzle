@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:10 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 11:31:16 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 15:13:20 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,8 @@ pub fn solve(puzzle: &mut Puzzle, final_state: &puzzle::FinalPuzzle, opts: Optio
 	a_list.insert(puzzle.taq.clone());
 
 	let start = Instant::now();
-	while puzzle.estimate_dst != 0 {
+	// while puzzle.estimate_dst != 0 {
+	while puzzle.taq != final_state.puzzle {
 		c_list.insert(puzzle.taq.clone(), (puzzle.estimate_dst, puzzle.actual_dst, next.predecessor.clone()));
 		update_open_list(puzzle, o_list, final_state, a_list, &opts);
 		next = o_list.pop().unwrap();
@@ -70,8 +71,8 @@ pub fn solve(puzzle: &mut Puzzle, final_state: &puzzle::FinalPuzzle, opts: Optio
 		};
 		puzzle.estimate_dst = next.estimate_dst;
 	}
-	let elapsed = start.elapsed();
 	println! ("Success :)");
+	let elapsed = start.elapsed();
 	print::print_all(puzzle, c_list, final_state.size, next.predecessor.clone(), final_state, &opts);
 	println!("Time  : {:?}", elapsed);
 }

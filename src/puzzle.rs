@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/09 15:41:09 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 14:19:41 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -199,9 +199,12 @@ pub fn print_puzzle(taquin: & Vec<u16>, size: usize, final_state: &FinalPuzzle, 
 			else {
 				print!("{}[91m", 27 as char);
 			}
+			print!("{number:>width$} ", number=taquin[i], width=2);
+			print!("{}[0m", 27 as char);
 		}
-		print!("{number:>width$} ", number=taquin[i], width=2);
-		print!("{}[0m", 27 as char);
+		else {
+			print!("{number:>width$} ", number=taquin[i], width=2);
+		}
 		if i % (size as usize) == size as usize - 1 {
 			print!("\n");
 		}
