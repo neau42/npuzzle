@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 18:14:04 by no               ###   ########.fr       */
+/*   Updated: 2019/02/12 19:53:03 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,67 @@ use std::cmp::Ordering;
 use crate::heuristics;
 use crate::options::Options;
 
+use std::rc::Rc;
+use std::cell::RefCell;
+use std::hash::{Hash, Hasher};
 
-#[derive(Debug, Eq, Hash)]
+#[derive(Debug, Eq)]
+pub struct RefPuzzle {
+	pub ref_puzzle : Rc<RefCell<PuzzleRes>>
+}
+
+impl Clone for RefPuzzle {
+    fn clone(&self) -> RefPuzzle {
+		RefPuzzle {
+			ref_puzzle:  Rc::clone(&self.ref_puzzle)
+		}
+	}
+}
+
+impl PartialOrd for RefPuzzle {
+    fn partial_cmp(&self, other: &RefPuzzle) -> Option<Ordering> {
+
+        (other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
+		.partial_cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
+    }
+}
+
+impl PartialEq for RefPuzzle {
+    fn eq(&self, other: &RefPuzzle) -> bool {
+        self.ref_puzzle.borrow().taq == other.ref_puzzle.borrow().taq
+    }
+}
+
+impl Ord for RefPuzzle {
+    fn cmp(&self, other: &RefPuzzle) -> Ordering {
+	(other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
+		.cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
+        // self.ref_puzzle.borrow().value.cmp(&other.ref_puzzle.borrow().value)
+    }
+}
+
+impl Hash for RefPuzzle {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ref_puzzle.borrow().hash(state);
+    }
+}
+
+#[derive(Debug, Eq)]
 pub struct PuzzleRes {
     pub taq: Vec<u16>,
 	pub estimate_dst: i32,
 	pub actual_dst: i32,
-	pub predecessor: Vec<u16>,
+	pub predecessor : Option<RefPuzzle>,
+// 
+	// pub predecessor: Vec<u16>,
 }
+
+impl Hash for PuzzleRes {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.taq.hash(state);
+    }
+}
+
 
 impl PartialEq for PuzzleRes {
 		fn eq(&self, other: &PuzzleRes) -> bool {
@@ -148,38 +201,67 @@ pub fn init_final_stat(size: usize) -> FinalPuzzle {
 	FinalPuzzle { size: size as i32, puzzle: puzzle.taq, position }
 }
 
-
-pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
-	if !(zero_pos % size == size - 1) {
+pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+	if !(zero_pos >= final_state.size as usize * final_state.size as usize - final_state.size as usize) {
 		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos + 1);
-		return Ok(new);
-	}
-	Err(std::io::Error::new(IoErr::Other, "unable to move left"))
-}
+		new.swap(zero_pos, zero_pos + final_state.size as usize);
 
-pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
-	if !(zero_pos % size == 0) {
+	return Ok( RefPuzzle {
+			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
+				taq: new,
+				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				predecessor: Some(predecessor.clone()),
+			} ))
+		});
+	}
+	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
+}
+pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+	if !(zero_pos < final_state.size as usize) {
+		let mut new = taquin.clone();
+		new.swap(zero_pos, zero_pos - final_state.size as usize);
+	return Ok( RefPuzzle {
+			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
+				taq: new,
+				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				predecessor: Some(predecessor.clone()),
+			} ))
+		});
+	}
+	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
+}
+pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+	
+	if !(zero_pos % final_state.size as usize == 0) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos - 1);
-		return Ok(new);
-	}
-	Err(std::io::Error::new(IoErr::Other, "unable to move right"))
-}
-pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
-	if !(zero_pos >= size * size - size) {
-		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos + size);
-		return Ok(new);
-	}
-	Err(std::io::Error::new(IoErr::Other, "unable to move up"))
-}
 
-pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, size: usize) -> Result<Vec<u16>, io::Error> {
-	if !(zero_pos < size) {
+	return Ok( RefPuzzle {
+			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
+				taq: new,
+				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				predecessor: Some(predecessor.clone()),
+			} ))
+		});
+	}
+	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
+}
+pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+	 if !(zero_pos % final_state.size  as usize == final_state.size as usize - 1) {
 		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos - size);
-		return Ok(new);
+		new.swap(zero_pos, zero_pos + 1);
+
+	return Ok( RefPuzzle {
+			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
+				taq: new,
+				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				predecessor: Some(predecessor.clone()),
+			} ))
+		});
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }

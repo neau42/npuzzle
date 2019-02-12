@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:16 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 19:09:52 by no               ###   ########.fr       */
+/*   Updated: 2019/02/12 19:54:27 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,7 +91,6 @@ pub fn distance_estimator_linear(taquin: & Vec<u16>, final_state: &puzzle::Final
 		}
 	}
 	// process::exit(0);
-	// (cmpt + distance_estimator_manhattan(taquin, final_state))
 	cmpt
 }
 

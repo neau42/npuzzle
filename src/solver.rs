@@ -6,12 +6,12 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:10 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 19:09:04 by no               ###   ########.fr       */
+/*   Updated: 2019/02/12 20:52:21 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use std::io;
-use std::collections::HashMap;
+// use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::BinaryHeap;
 use std::time::Instant;
@@ -21,19 +21,23 @@ use crate::print;
 use crate::puzzle::PuzzleRes;
 use crate::options::Options;
 
-fn update_open_list(puzzle: & Vec<u16>, open_list: &mut BinaryHeap<PuzzleRes>, final_state: & puzzle::FinalPuzzle, all_list: &mut HashSet<Vec<u16>>, actual_dst: i32, opts: &Options) {
-	let zero_pos = puzzle.iter().position(|r| *r == 0).unwrap() as u16 as usize;
-	static MOVE_FUNCTIONS: &[ fn(&Vec<u16>, usize, usize) -> Result<Vec<u16>, io::Error>; 4] =
+use crate::puzzle::RefPuzzle;
+use std::rc::Rc;
+use std::cell::RefCell;
+
+// use std::process;
+fn update_open_list(r_puzzle: & RefPuzzle, open_list: &mut BinaryHeap<RefPuzzle>, final_state: & puzzle::FinalPuzzle, all_list: &mut HashSet<RefPuzzle>, opts: &Options) {
+	let zero_pos = r_puzzle.ref_puzzle.borrow().taq.iter().position(|r| *r == 0).unwrap() as u16 as usize;
+
+static MOVE_FUNCTIONS: &[ fn(&Vec<u16>, usize, & puzzle::FinalPuzzle, &RefPuzzle, &Options) -> Result<RefPuzzle, io::Error>; 4] =
 		&[puzzle::move_up, puzzle::move_down, puzzle::move_left, puzzle::move_right];
-	let mut dst;
 
 	for function in MOVE_FUNCTIONS {
-		match function(&puzzle, zero_pos, final_state.size as usize) {
-			Ok(taquin) => {
-				if !all_list.contains(&taquin) {
-					dst = heuristics::distance_estimator(&taquin, final_state, opts);
-					open_list.push(PuzzleRes{taq: taquin.clone(),estimate_dst: dst, actual_dst: actual_dst + 1,predecessor: puzzle.clone()} );
-					all_list.insert(taquin);
+		match function(&r_puzzle.ref_puzzle.borrow().taq, zero_pos, final_state, r_puzzle, opts) {
+			Ok(new_puzzle) => {
+				if !all_list.contains(&new_puzzle) {
+					open_list.push(new_puzzle.clone());
+					all_list.insert(new_puzzle);
 				}
 			}
 			_          => (),
@@ -42,33 +46,42 @@ fn update_open_list(puzzle: & Vec<u16>, open_list: &mut BinaryHeap<PuzzleRes>, f
 }
 
 pub fn solve(p: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: & Options) {
-	let mut close_list: HashMap<Vec<u16>, (i32, i32, Vec<u16>)> = HashMap::new();
-	let mut open_list: BinaryHeap<PuzzleRes>  = BinaryHeap::new();
-	let mut all_list: HashSet<Vec<u16>> = HashSet::new();
-	let mut puzzle = p;
-	let ref mut o_list = open_list;
-	let ref mut a_list = all_list;
-	let mut next = PuzzleRes {
-		taq: Vec::new(),
-		estimate_dst: heuristics::distance_estimator(puzzle, final_state, opts) as i32,
-		actual_dst: 0,
-		predecessor:Vec::new()
-	};
+
+	let mut close_list_new: HashSet<RefPuzzle> = HashSet::new();
+	let mut open_list_new: BinaryHeap<RefPuzzle> = BinaryHeap::new();
+	let mut all_list_new: HashSet<RefPuzzle> = HashSet::new();
+	let ref mut o_list = open_list_new;
+	let ref mut a_list = all_list_new;
+
+	let first_puzzle: RefPuzzle = RefPuzzle {
+			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+				taq: p.clone(),
+				estimate_dst: heuristics::distance_estimator(p, final_state, opts) as i32,
+				actual_dst: 0,
+				predecessor: None,
+			} ))
+		};
+	let mut puzzle = first_puzzle;
 
 	let start = Instant::now();
 	a_list.insert(puzzle.clone());
-	// while puzzle.estimate_dst != 0 {
-	while *puzzle != final_state.puzzle {
-		close_list.insert(puzzle.clone(), (next.estimate_dst, next.actual_dst, next.predecessor));
-		update_open_list(puzzle, o_list, final_state, a_list, next.actual_dst, opts);
-		next = o_list.pop().unwrap();
-		puzzle = &next.taq;
-		if opts.greedy {
-			next.actual_dst = 0;
-		}
+	println!("first:");
+	puzzle::print_puzzle(& a_list.get(&puzzle).unwrap().ref_puzzle.borrow().taq, final_state, opts);
+
+	while puzzle.ref_puzzle.borrow().taq != final_state.puzzle {
+		close_list_new.insert(puzzle.clone());
+		// println!("insert in close list:");
+		// puzzle::print_puzzle(&close_list_new.get(&puzzle).unwrap().ref_puzzle.borrow().taq, final_state, opts);
+		update_open_list(&puzzle, o_list, final_state, a_list, opts);
+		puzzle = o_list.pop().unwrap();
+		// if opts.greedy {
+		// 	next.actual_dst = 0;
+		// }
 	}
+	close_list_new.insert(puzzle.clone());
 	println! ("Success :)");
 	let time = start.elapsed();
-	print::print_all(puzzle, &close_list, &next.predecessor, final_state, opts);
+	print::print(&close_list_new, &puzzle, final_state, opts);
+	// print::print_all(puzzle, &close_list, &next.predecessor, final_state, opts);
 	println!("Time  : {:?}", time);
 }
