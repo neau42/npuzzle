@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:10 by no                #+#    #+#             */
-/*   Updated: 2019/02/12 20:52:21 by no               ###   ########.fr       */
+/*   Updated: 2019/02/12 21:28:40 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,14 +26,14 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 // use std::process;
-fn update_open_list(r_puzzle: & RefPuzzle, open_list: &mut BinaryHeap<RefPuzzle>, final_state: & puzzle::FinalPuzzle, all_list: &mut HashSet<RefPuzzle>, opts: &Options) {
+fn update_open_list(r_puzzle: & RefPuzzle, open_list: &mut BinaryHeap<RefPuzzle>, final_state: & puzzle::FinalPuzzle, all_list: &mut HashSet<RefPuzzle>, opts: &Options, mut actual_dst: usize) {
 	let zero_pos = r_puzzle.ref_puzzle.borrow().taq.iter().position(|r| *r == 0).unwrap() as u16 as usize;
 
-static MOVE_FUNCTIONS: &[ fn(&Vec<u16>, usize, & puzzle::FinalPuzzle, &RefPuzzle, &Options) -> Result<RefPuzzle, io::Error>; 4] =
+static MOVE_FUNCTIONS: &[ fn(&Vec<u16>, usize, & puzzle::FinalPuzzle, &RefPuzzle, &Options, i32) -> Result<RefPuzzle, io::Error>; 4] =
 		&[puzzle::move_up, puzzle::move_down, puzzle::move_left, puzzle::move_right];
 
 	for function in MOVE_FUNCTIONS {
-		match function(&r_puzzle.ref_puzzle.borrow().taq, zero_pos, final_state, r_puzzle, opts) {
+		match function(&r_puzzle.ref_puzzle.borrow().taq, zero_pos, final_state, r_puzzle, opts, actual_dst as i32) {
 			Ok(new_puzzle) => {
 				if !all_list.contains(&new_puzzle) {
 					open_list.push(new_puzzle.clone());
@@ -62,21 +62,18 @@ pub fn solve(p: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: & Options) {
 			} ))
 		};
 	let mut puzzle = first_puzzle;
+	let mut actual_dst = 0;
 
 	let start = Instant::now();
 	a_list.insert(puzzle.clone());
 	println!("first:");
 	puzzle::print_puzzle(& a_list.get(&puzzle).unwrap().ref_puzzle.borrow().taq, final_state, opts);
-
+	let test_greedy = if opts.greedy { 0 } else { 1 };
+	
 	while puzzle.ref_puzzle.borrow().taq != final_state.puzzle {
 		close_list_new.insert(puzzle.clone());
-		// println!("insert in close list:");
-		// puzzle::print_puzzle(&close_list_new.get(&puzzle).unwrap().ref_puzzle.borrow().taq, final_state, opts);
-		update_open_list(&puzzle, o_list, final_state, a_list, opts);
+		update_open_list(&puzzle, o_list, final_state, a_list, opts, actual_dst + test_greedy);
 		puzzle = o_list.pop().unwrap();
-		// if opts.greedy {
-		// 	next.actual_dst = 0;
-		// }
 	}
 	close_list_new.insert(puzzle.clone());
 	println! ("Success :)");

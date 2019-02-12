@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/12 19:53:03 by no               ###   ########.fr       */
+/*   Updated: 2019/02/12 21:27:32 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -201,7 +201,7 @@ pub fn init_final_stat(size: usize) -> FinalPuzzle {
 	FinalPuzzle { size: size as i32, puzzle: puzzle.taq, position }
 }
 
-pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	if !(zero_pos >= final_state.size as usize * final_state.size as usize - final_state.size as usize) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos + final_state.size as usize);
@@ -210,14 +210,14 @@ pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, 
 			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
 				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
 				taq: new,
-				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				actual_dst,
 				predecessor: Some(predecessor.clone()),
 			} ))
 		});
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
-pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	if !(zero_pos < final_state.size as usize) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos - final_state.size as usize);
@@ -225,14 +225,14 @@ pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle
 			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
 				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
 				taq: new,
-				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				actual_dst,
 				predecessor: Some(predecessor.clone()),
 			} ))
 		});
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
-pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	
 	if !(zero_pos % final_state.size as usize == 0) {
 		let mut new = taquin.clone();
@@ -242,14 +242,14 @@ pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzl
 			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
 				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
 				taq: new,
-				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				actual_dst,
 				predecessor: Some(predecessor.clone()),
 			} ))
 		});
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
-pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options) -> Result<RefPuzzle, io::Error> {
+pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	 if !(zero_pos % final_state.size  as usize == final_state.size as usize - 1) {
 		let mut new = taquin.clone();
 		new.swap(zero_pos, zero_pos + 1);
@@ -258,7 +258,7 @@ pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle
 			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
 				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
 				taq: new,
-				actual_dst: predecessor.ref_puzzle.borrow().actual_dst + 1,
+				actual_dst,
 				predecessor: Some(predecessor.clone()),
 			} ))
 		});
