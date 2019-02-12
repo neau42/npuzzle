@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:16 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 16:26:07 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 19:09:52 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,8 @@ use crate::puzzle;
 pub fn estimate_one_manhattan(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle, value: u16, size: i32) -> i32 {
 	let pos_current = taquin.iter().position(|r| *r == value).unwrap() as i32;
 
-	((((pos_current % size) - ((final_state.position[value as usize] as i32) % size)) as i32).abs()
-		+ (((pos_current / size) - ((final_state.position[value as usize] as i32) / size)) as i32).abs()) as i32
+	((((pos_current % size) - ((final_state.position[value as usize] as i32) % size))).abs()
+		+ (((pos_current / size) - ((final_state.position[value as usize] as i32) / size))).abs()) as i32
 }
 
 pub fn distance_estimator_manhattan(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
@@ -46,7 +46,7 @@ pub fn distance_estimator_hamming(taquin: & Vec<u16>, final_state: &puzzle::Fina
 	cmpt
 }
 
-pub fn distance_estimator_linear(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: & Options) -> i32 {
+pub fn distance_estimator_linear(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
 	let size = final_state.size as usize;
 	let sq: usize = (size * size) - 1;
 
@@ -113,7 +113,7 @@ pub fn distance_estimator(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle,
 	match opts.heuristic {
 		HeuristicType::Manhattan => distance_estimator_manhattan(taquin, final_state),
 		HeuristicType::Hamming   => distance_estimator_hamming(taquin, final_state),
-		HeuristicType::Linear    => distance_estimator_linear(taquin, final_state, opts) + distance_estimator_manhattan(taquin, final_state),
+		HeuristicType::Linear    => distance_estimator_linear(taquin, final_state) + distance_estimator_manhattan(taquin, final_state),
 		HeuristicType::Combine   => distance_estimator_combine(taquin, final_state),
 	}
 }

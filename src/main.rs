@@ -6,22 +6,16 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 17:24:53 by no               ###   ########.fr       */
+/*   Updated: 2019/02/11 17:48:49 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// extern crate colored;
-// use crate::puzzle::Puzzle;
 pub mod parser;
 pub mod solver;
 pub mod puzzle;
 pub mod print;
 pub mod heuristics;
 pub mod options;
-    // use std::time::Instant;
-	// let start = Instant::now();
-	// 		let elapsed = start.elapsed();
-	// 		println!("Time  : {:?}", elapsed);
 
 fn print_usage() {
 	println!("usage:\tnpuzzle [-c -g -H -L -M -C -s] [file_name]");
