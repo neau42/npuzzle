@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:16 by no                #+#    #+#             */
-/*   Updated: 2019/02/12 19:54:27 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 16:13:15 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,11 @@ use crate::puzzle;
 
 // use std::process;
 
-pub fn estimate_one_manhattan(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle, value: u16, size: i32) -> i32 {
+pub fn estimate_one_manhattan(final_state_posx: i32,final_state_posy: i32, taquin: & Vec<u16>, value: u16, size: i32) -> i32 {
 	let pos_current = taquin.iter().position(|r| *r == value).unwrap() as i32;
 
-	((((pos_current % size) - ((final_state.position[value as usize] as i32) % size))).abs()
-		+ (((pos_current / size) - ((final_state.position[value as usize] as i32) / size))).abs()) as i32
+	(((pos_current % size) - final_state_posx).abs()
+		+ ((pos_current / size) - final_state_posy).abs()) as i32
 }
 
 pub fn distance_estimator_manhattan(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
@@ -29,26 +29,28 @@ pub fn distance_estimator_manhattan(taquin: & Vec<u16>, final_state: &puzzle::Fi
 	let sq: usize = (size * size) as usize;
 
 	for i in 1..sq {
-		cmpt += estimate_one_manhattan(taquin, final_state, i as u16, size);
+		cmpt += estimate_one_manhattan((final_state.position[i as usize] as i32) % size, (final_state.position[i as usize] as i32) / size, taquin, i as u16, size);
 	}
 	cmpt
 }
 
-pub fn distance_estimator_hamming(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
-	let mut cmpt: i32 = 0;
-	let sq: usize = (final_state.size * final_state.size) as usize;
+// pub fn distance_estimator_hamming(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
+// 	let mut cmpt: i32 = 0;
+// 	let sq: usize = (final_state.size * final_state.size) as usize;
 
-	for i in 1..sq - 1 {
-		if taquin[i] != final_state.puzzle[i] {
-			cmpt += 1;
-		}
-	}
-	cmpt
-}
+// 	// for i in 1..sq - 1 {
+// 	for i in 1..sq {
+// 		if taquin[i] != final_state.puzzle[i] {
+// 			cmpt += 1;
+// 		}
+// 	}
+// 	cmpt
+// }
 
 pub fn distance_estimator_linear(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
 	let size = final_state.size as usize;
-	let sq: usize = (size * size) - 1;
+	// let sq: usize = (size * size) - 1;
+	let sq: usize = size * size;
 
 	let mut cmpt: i32 = 0;
 	let mut current_pos_x: usize;
@@ -90,17 +92,18 @@ pub fn distance_estimator_linear(taquin: & Vec<u16>, final_state: &puzzle::Final
 			}
 		}
 	}
-	// process::exit(0);
 	cmpt
 }
 
-pub fn distance_estimator_combine(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
+pub fn distance_estimator_hamming(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle) -> i32 {
 	let mut cmpt: i32 = 0;
 	let size = final_state.size;
-	let sq: usize = (size * size) as usize - 1;
+	let sq: usize = (size * size) as usize;
+
+
 
 	for i in 1..sq {
-		cmpt += estimate_one_manhattan(taquin, final_state, i as u16, size);
+		cmpt += estimate_one_manhattan((final_state.position[i as usize] as i32) % size, (final_state.position[i as usize] as i32) / size, taquin, i as u16, size);
 		if taquin[i] != final_state.puzzle[i] {
 			cmpt += 1;
 		}
@@ -110,9 +113,8 @@ pub fn distance_estimator_combine(taquin: & Vec<u16>, final_state: &puzzle::Fina
 
 pub fn distance_estimator(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: & Options) -> i32 {
 	match opts.heuristic {
-		HeuristicType::Manhattan => distance_estimator_manhattan(taquin, final_state),
-		HeuristicType::Hamming   => distance_estimator_hamming(taquin, final_state),
-		HeuristicType::Linear    => distance_estimator_linear(taquin, final_state) + distance_estimator_manhattan(taquin, final_state),
-		HeuristicType::Combine   => distance_estimator_combine(taquin, final_state),
+		HeuristicType::Manhattan       => distance_estimator_manhattan(taquin, final_state),
+		HeuristicType::Hamming         => distance_estimator_hamming(taquin, final_state),
+		HeuristicType::LinearConflict  => distance_estimator_linear(taquin, final_state) + distance_estimator_manhattan(taquin, final_state),
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/06 10:28:13 by no                #+#    #+#             */
-/*   Updated: 2019/02/06 15:23:14 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 16:06:13 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,7 @@
 pub enum HeuristicType {
 	Manhattan,
 	Hamming,
-	Linear,
-	Combine,
+	LinearConflict
 }
 
 #[derive(Debug)]
@@ -25,7 +24,7 @@ pub struct Options {
 	pub heuristic: HeuristicType,
 	pub greedy: bool,
 	pub color: bool,
-	pub sleep: bool,
+	pub sleep: bool
 }
 
 impl Options {
@@ -33,7 +32,7 @@ impl Options {
 	Options {
 		file_name: "".to_string(),
 		file_name_present: false,
-		heuristic: HeuristicType::Combine,
+		heuristic: HeuristicType::Hamming,
 		greedy: false,//?
 		color: false,
 		sleep: false }

@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:15 by no                #+#    #+#             */
-/*   Updated: 2019/02/11 18:12:53 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 16:06:13 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,9 +41,9 @@ fn get_opts(opts: &mut Options, s: &str) -> bool {
 		"-c" => opts.color = true,
 		"-g" => opts.greedy = true,
 		"-H" => opts.heuristic = HeuristicType::Hamming,
-		"-L" => opts.heuristic = HeuristicType::Linear,
+		"-L" => opts.heuristic = HeuristicType::LinearConflict,
 		"-M" => opts.heuristic = HeuristicType::Manhattan,
-		"-C" => opts.heuristic = HeuristicType::Combine,
+		// "-C" => opts.heuristic = HeuristicType::Combine,
 		"-s" => opts.sleep = true,
 		_ => return false,
 	}

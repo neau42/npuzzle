@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/12 21:27:32 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 15:53:08 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,9 @@ impl Clone for RefPuzzle {
 impl PartialOrd for RefPuzzle {
     fn partial_cmp(&self, other: &RefPuzzle) -> Option<Ordering> {
 
-        (other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
-		.partial_cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
+        (other.ref_puzzle.borrow().total_dst).partial_cmp(&(self.ref_puzzle.borrow().total_dst))
+        // (other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
+		// .partial_cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
     }
 }
 
@@ -49,9 +50,10 @@ impl PartialEq for RefPuzzle {
 
 impl Ord for RefPuzzle {
     fn cmp(&self, other: &RefPuzzle) -> Ordering {
-	(other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
-		.cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
-        // self.ref_puzzle.borrow().value.cmp(&other.ref_puzzle.borrow().value)
+	(other.ref_puzzle.borrow().total_dst)
+		.cmp(&(self.ref_puzzle.borrow().total_dst))
+		// 	(other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
+		// .cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
     }
 }
 
@@ -60,12 +62,39 @@ impl Hash for RefPuzzle {
         self.ref_puzzle.borrow().hash(state);
     }
 }
-
+impl RefPuzzle {
+	pub fn new(taquin: Vec<u16>, final_state: & FinalPuzzle, predecessor: RefPuzzle, opts: &Options, actual_dst: i32) -> RefPuzzle {
+		let estimate_dst = heuristics::distance_estimator(&taquin, final_state, opts);
+		RefPuzzle {
+				ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+					estimate_dst,
+					actual_dst,
+					total_dst: actual_dst + estimate_dst,
+					predecessor: Some(predecessor),
+					taq: taquin,
+				} ))
+			}
+	}
+	
+	pub fn first(taquin: Vec<u16>, final_state: & FinalPuzzle, opts: &Options) -> RefPuzzle {
+		let estimate_dst = heuristics::distance_estimator(&taquin, final_state, opts);
+		RefPuzzle {
+				ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
+					estimate_dst,
+					taq: taquin,
+					actual_dst: 0,
+					total_dst: estimate_dst,
+					predecessor: None,
+				} ))
+			}
+	}
+}
 #[derive(Debug, Eq)]
 pub struct PuzzleRes {
     pub taq: Vec<u16>,
 	pub estimate_dst: i32,
 	pub actual_dst: i32,
+	pub total_dst: i32,
 	pub predecessor : Option<RefPuzzle>,
 // 
 	// pub predecessor: Vec<u16>,
@@ -89,7 +118,8 @@ impl PartialOrd for PuzzleRes {
 		// if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
 		// 	return (self.actual_dst).partial_cmp(&(other.actual_dst));
 		// }
-		(other.estimate_dst + other.actual_dst).partial_cmp(&(self.estimate_dst + self.actual_dst))
+		(other.total_dst).partial_cmp(&(self.total_dst))
+		// (other.estimate_dst + other.actual_dst).partial_cmp(&(self.estimate_dst + self.actual_dst))
 	}
 }
 
@@ -98,7 +128,9 @@ impl Ord for PuzzleRes {
 		// if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
 		// 	return (self.actual_dst).cmp(&(other.actual_dst));
 		// }
-		(other.estimate_dst + other.actual_dst).cmp(&(self.estimate_dst + self.actual_dst))
+		(other.total_dst).cmp(&(self.total_dst))
+		// (other.estimate_dst + other.actual_dst).cmp(&(self.estimate_dst + self.actual_dst))
+
 	}
 }
 
@@ -179,7 +211,7 @@ impl Puzzle {
 				cmpt += 1;
 			}
 		}
-		(heuristics::estimate_one_manhattan(&self.taq, final_state, 0, final_state.size) % 2 == cmpt % 2)		
+		(heuristics::estimate_one_manhattan((final_state.position[0] as i32) % final_state.size, (final_state.position[0] as i32) / final_state.size, &self.taq, 0, final_state.size) % 2 == cmpt % 2)
 	}
 }
 
@@ -201,69 +233,38 @@ pub fn init_final_stat(size: usize) -> FinalPuzzle {
 	FinalPuzzle { size: size as i32, puzzle: puzzle.taq, position }
 }
 
-pub fn move_up(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
+pub fn move_up(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	if !(zero_pos >= final_state.size as usize * final_state.size as usize - final_state.size as usize) {
-		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos + final_state.size as usize);
-
-	return Ok( RefPuzzle {
-			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
-				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
-				taq: new,
-				actual_dst,
-				predecessor: Some(predecessor.clone()),
-			} ))
-		});
+		let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
+		new_taquin.swap(zero_pos, zero_pos + final_state.size as usize);
+		return Ok( RefPuzzle::new(new_taquin, final_state, predecessor.clone(), opts, actual_dst) );
 	}
-	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
+	Err(std::io::Error::new(IoErr::Other, "unable to move up"))
 }
-pub fn move_down(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
+
+pub fn move_down(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	if !(zero_pos < final_state.size as usize) {
-		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos - final_state.size as usize);
-	return Ok( RefPuzzle {
-			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
-				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
-				taq: new,
-				actual_dst,
-				predecessor: Some(predecessor.clone()),
-			} ))
-		});
+		let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
+		new_taquin.swap(zero_pos, zero_pos - final_state.size as usize);
+		return Ok( RefPuzzle::new(new_taquin, final_state, predecessor.clone(), opts, actual_dst) );
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
-pub fn move_right(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
-	
+pub fn move_right(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	if !(zero_pos % final_state.size as usize == 0) {
-		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos - 1);
-
-	return Ok( RefPuzzle {
-			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
-				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
-				taq: new,
-				actual_dst,
-				predecessor: Some(predecessor.clone()),
-			} ))
-		});
+		let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
+		new_taquin.swap(zero_pos, zero_pos - 1);
+		return Ok( RefPuzzle::new(new_taquin, final_state, predecessor.clone(), opts, actual_dst) );
 	}
-	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
+	Err(std::io::Error::new(IoErr::Other, "unable to move right"))
 }
-pub fn move_left(taquin: & Vec<u16>, zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
+pub fn move_left(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
 	 if !(zero_pos % final_state.size  as usize == final_state.size as usize - 1) {
-		let mut new = taquin.clone();
-		new.swap(zero_pos, zero_pos + 1);
-
-	return Ok( RefPuzzle {
-			ref_puzzle :Rc::new(RefCell::new(PuzzleRes {
-				estimate_dst: heuristics::distance_estimator(&new, final_state, opts),
-				taq: new,
-				actual_dst,
-				predecessor: Some(predecessor.clone()),
-			} ))
-		});
+		let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
+		new_taquin.swap(zero_pos, zero_pos + 1);
+		return Ok( RefPuzzle::new(new_taquin, final_state, predecessor.clone(), opts, actual_dst) );
 	}
-	Err(std::io::Error::new(IoErr::Other, "unable to move down"))
+	Err(std::io::Error::new(IoErr::Other, "unable to move left"))
 }
 
 pub fn print_puzzle(taquin: & Vec<u16>, final_state: &FinalPuzzle, opts: &Options) {
