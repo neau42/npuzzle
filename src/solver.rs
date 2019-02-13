@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:10 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 16:12:04 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 20:57:38 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,17 +52,16 @@ pub fn solve(first: Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: & Options
 
 	let start = Instant::now();
 	a_list.insert(puzzle.clone());
+	close_list.insert(puzzle.clone());
 
 	while puzzle.ref_puzzle.borrow().taq != final_state.puzzle {
-		close_list.insert(puzzle.clone());
 		update_open_list(puzzle, o_list, final_state, a_list, opts, actual_dst + not_greedy);
 		puzzle = o_list.pop().unwrap();
 		actual_dst = puzzle.ref_puzzle.borrow().actual_dst as usize;
+		close_list.insert(puzzle.clone());
 	}
-	close_list.insert(puzzle.clone());
 	let time = start.elapsed();
 	println! ("Success :)");
 	print::print(&close_list, open_list.len() + close_list.len(), &puzzle, final_state, opts);
-	println! ("# {} states represented in memory at the same time", open_list.len() + close_list.len());
 	println!("# Time  : {:?}\n###", time);
 }

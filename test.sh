@@ -18,7 +18,7 @@ if [ $? -ne 0 ] ; then
 fi
 
 cargo build --release
-LOG_WORDS="len\|cpu\|number\|state\|movements\|time"
+LOG_WORDS="len\|cpu\|number\|state\|movements\|time\|heuristic\|states\|#"
 COMMIT_ID="`git rev-parse master | head -c 8`"
 TIME="`date +"%s"`"
 FILE_NAME=".log/time_test_$1_${TIME}:${COMMIT_ID}.log"

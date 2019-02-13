@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 15:33:39 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 18:46:44 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,15 @@ pub mod options;
 
 fn print_usage() {
 	println!("usage:\tnpuzzle [-c -g -H -L -M -C -s] [file_name]");
-	println!("\tc: color output");
-	println!("\tg: greedy algo");
-	println!("\tM: Heuristic: Manhattan");
-	println!("\tH: Heuristic: Hamming + Manhattan (Default)");
-	println!("\tL: Heuristic: Linear conflict + Manhattan");
-	println!("\ts: sleep to print output");
+	println!("\t-c: color output");
+	println!("\t-g: greedy algo");
+	println!("\t-M: Heuristic: Manhattan");
+	println!("\t-H: Heuristic: Hamming + Manhattan (Default)");
+	println!("\t-L: Heuristic: Linear conflict + Manhattan");
+	println!("\t-D: Djikstra");
+	println!("\t-E: Euclidean");
+	println!("\t-C: Chebyshev");
+	println!("\t-s: sleep to print output");
 }
 
 fn main() {

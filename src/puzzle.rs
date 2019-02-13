@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 15:53:08 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 21:01:35 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,10 +35,7 @@ impl Clone for RefPuzzle {
 
 impl PartialOrd for RefPuzzle {
     fn partial_cmp(&self, other: &RefPuzzle) -> Option<Ordering> {
-
         (other.ref_puzzle.borrow().total_dst).partial_cmp(&(self.ref_puzzle.borrow().total_dst))
-        // (other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
-		// .partial_cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
     }
 }
 
@@ -50,10 +47,7 @@ impl PartialEq for RefPuzzle {
 
 impl Ord for RefPuzzle {
     fn cmp(&self, other: &RefPuzzle) -> Ordering {
-	(other.ref_puzzle.borrow().total_dst)
-		.cmp(&(self.ref_puzzle.borrow().total_dst))
-		// 	(other.ref_puzzle.borrow().estimate_dst + other.ref_puzzle.borrow().actual_dst)
-		// .cmp(&(self.ref_puzzle.borrow().estimate_dst + self.ref_puzzle.borrow().actual_dst))
+	(other.ref_puzzle.borrow().total_dst).cmp(&(self.ref_puzzle.borrow().total_dst))
     }
 }
 
@@ -96,8 +90,6 @@ pub struct PuzzleRes {
 	pub actual_dst: i32,
 	pub total_dst: i32,
 	pub predecessor : Option<RefPuzzle>,
-// 
-	// pub predecessor: Vec<u16>,
 }
 
 impl Hash for PuzzleRes {
@@ -115,22 +107,13 @@ impl PartialEq for PuzzleRes {
 
 impl PartialOrd for PuzzleRes {
     fn partial_cmp(&self, other: &PuzzleRes) -> Option<Ordering> {
-		// if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
-		// 	return (self.actual_dst).partial_cmp(&(other.actual_dst));
-		// }
 		(other.total_dst).partial_cmp(&(self.total_dst))
-		// (other.estimate_dst + other.actual_dst).partial_cmp(&(self.estimate_dst + self.actual_dst))
 	}
 }
 
 impl Ord for PuzzleRes {
-     fn cmp(&self, other: &PuzzleRes) -> Ordering {
-		// if self.estimate_dst + self.actual_dst == other.estimate_dst + other.actual_dst {
-		// 	return (self.actual_dst).cmp(&(other.actual_dst));
-		// }
+	fn cmp(&self, other: &PuzzleRes) -> Ordering {
 		(other.total_dst).cmp(&(self.total_dst))
-		// (other.estimate_dst + other.actual_dst).cmp(&(self.estimate_dst + self.actual_dst))
-
 	}
 }
 
@@ -259,7 +242,7 @@ pub fn move_right(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &Ref
 	Err(std::io::Error::new(IoErr::Other, "unable to move right"))
 }
 pub fn move_left(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefPuzzle, opts: &Options, actual_dst: i32) -> Result<RefPuzzle, io::Error> {
-	 if !(zero_pos % final_state.size  as usize == final_state.size as usize - 1) {
+	 if !(zero_pos % final_state.size as usize == final_state.size as usize - 1) {
 		let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
 		new_taquin.swap(zero_pos, zero_pos + 1);
 		return Ok( RefPuzzle::new(new_taquin, final_state, predecessor.clone(), opts, actual_dst) );

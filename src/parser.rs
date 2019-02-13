@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:15 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 16:06:13 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 20:57:38 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ pub fn get_puzzle(opts: & Options) -> Result<Puzzle, io::Error> {
 	}
 }
 
-pub fn generate_random_puzzle(size: u32) -> Puzzle {
+pub fn generate_random_puzzle(size: u16) -> Puzzle {
 	let mut rnd_taquin = Puzzle::gen_final_state(size as usize);
 
 	rnd_taquin.taq.shuffle(&mut thread_rng());
@@ -43,7 +43,9 @@ fn get_opts(opts: &mut Options, s: &str) -> bool {
 		"-H" => opts.heuristic = HeuristicType::Hamming,
 		"-L" => opts.heuristic = HeuristicType::LinearConflict,
 		"-M" => opts.heuristic = HeuristicType::Manhattan,
-		// "-C" => opts.heuristic = HeuristicType::Combine,
+		"-D" => opts.heuristic = HeuristicType::Djikstra,
+		"-E" => opts.heuristic = HeuristicType::Euclidean,
+		"-C" => opts.heuristic = HeuristicType::Chebyshev,
 		"-s" => opts.sleep = true,
 		_ => return false,
 	}
@@ -112,15 +114,15 @@ fn read_file(name: &String) -> Result<Puzzle, io::Error> {
 					break ;
 				}
 				count += 1;
-				if count > size || e.parse::<u32>().is_err() {
+				if count > size || e.parse::<u16>().is_err() {
 					return Err(std::io::Error::new(IoErr::Other, "Bad format"));
 				}
 				v.push(e.parse::<u16>().unwrap());
 			}
 		}
 	}
-	if size < 2 || size > 17 || v.len() != (size * size) as usize { // SIZE <= 15 || u16 -> u16 ;(
+	if size < 2 || size > 17 || v.len() != (size * size) as usize {
 		return Err(std::io::Error::new(IoErr::Other, "not valid size"));
 	}
-	Ok(Puzzle { size, taq : v }) //, actual_dst: 0, estimate_dst: -1 } )
+	Ok(Puzzle { size, taq : v })
 }

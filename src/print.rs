@@ -13,9 +13,8 @@ pub fn	print(close_list: &HashSet<RefPuzzle>,nb_states: usize ,puzzle: &RefPuzzl
 	let mut ref_predecessor;
 	let mut predecessor;
 	let mut taquin;
-	let mut len: u32 = 0;
+	let mut len: u16 = 0;
 
-	// puzzle::print_puzzle(&puzzle.ref_puzzle.borrow().taq , final_state, opts);
 	list_final.push(final_state.puzzle.clone());
 	let mut puzzle = puzzle.ref_puzzle.borrow();
 	loop {
@@ -48,14 +47,16 @@ pub fn	print(close_list: &HashSet<RefPuzzle>,nb_states: usize ,puzzle: &RefPuzzl
 	println! ("###\n# {:?} heuristic", opts.heuristic);
 	println! ("# {} movements", len);
 	println! ("# {} states selected", close_list.len());
+	println! ("# {} states represented in memory at the same time", nb_states);
+
 	// println! ("Close list length : {} ", a_l .len());
 }
 
 // pub fn	print_all(p: & Vec<u16>, close_list: &HashMap<Vec<u16>, (i32, i32, Vec<u16>)>,
-// prev: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) -> u32 {
+// prev: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) -> u16 {
 
 // 	let ref mut end: Vec<Vec<u16>> = Vec::new();
-// 	let mut len: u32 = 0;
+// 	let mut len: u16 = 0;
 // 	let mut puzzle = p;
 // 	let mut predecessor = prev;
 
@@ -69,7 +70,7 @@ pub fn	print(close_list: &HashSet<RefPuzzle>,nb_states: usize ,puzzle: &RefPuzzl
 // 		len += 1;
 // 	}
 
-// 	let mut len: u32 = 0;
+// 	let mut len: u16 = 0;
 // 	let mut elem: Vec<u16>;
 // 	loop {
 // 		elem = match end.pop() {
