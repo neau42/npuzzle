@@ -1,11 +1,51 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   print.rs                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/13 21:05:46 by no                #+#    #+#             */
+/*   Updated: 2019/02/13 21:06:37 by no               ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 use std::collections::HashSet;
 use crate::puzzle;
 use crate::puzzle::RefPuzzle;
-// use crate::puzzle::Puzzle;
 use std::thread;
 use std::time;
 extern crate termion;
 use crate::options::Options;
+
+
+pub fn print_puzzle(taquin: & Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) {
+	let size = final_state.size;
+	let sq: usize = (size * size) as usize;
+
+	for i in 0..sq {
+		if opts.color {
+		
+			if taquin[i] == 0 {}
+			else if final_state.position[taquin[i] as usize] == i as u16 {
+				print!("{}[92m", 27 as char);
+			}
+			else {
+				print!("{}[91m", 27 as char);
+			}
+			print!("{number:>width$} ", number=taquin[i], width=2);
+			print!("{}[0m", 27 as char);
+		}
+		else {
+			print!("{number:>width$} ", number=taquin[i], width=2);
+		}
+		if i % (size as usize) == size as usize - 1 {
+			print!("\n");
+		}
+	}
+	print!("\n");
+}
+
 
 pub fn	print(close_list: &HashSet<RefPuzzle>,nb_states: usize ,puzzle: &RefPuzzle, final_state: &puzzle::FinalPuzzle, opts: &Options) {
 
@@ -39,7 +79,7 @@ pub fn	print(close_list: &HashSet<RefPuzzle>,nb_states: usize ,puzzle: &RefPuzzl
 			println!("{}[2J{}",27 as char , termion::cursor::Goto(1, 1));
 		}
 		println!("N-puzzle: ");
-		puzzle::print_puzzle(&elem, final_state, opts);
+		print_puzzle(&elem, final_state, opts);
 		if opts.sleep {
 			thread::sleep(time::Duration::from_millis(200));
 		}
@@ -48,46 +88,4 @@ pub fn	print(close_list: &HashSet<RefPuzzle>,nb_states: usize ,puzzle: &RefPuzzl
 	println! ("# {} movements", len);
 	println! ("# {} states selected", close_list.len());
 	println! ("# {} states represented in memory at the same time", nb_states);
-
-	// println! ("Close list length : {} ", a_l .len());
 }
-
-// pub fn	print_all(p: & Vec<u16>, close_list: &HashMap<Vec<u16>, (i32, i32, Vec<u16>)>,
-// prev: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) -> u16 {
-
-// 	let ref mut end: Vec<Vec<u16>> = Vec::new();
-// 	let mut len: u16 = 0;
-// 	let mut puzzle = p;
-// 	let mut predecessor = prev;
-
-// 	loop {
-// 		end.push((*puzzle).clone());
-// 		puzzle = predecessor;
-// 		predecessor = match close_list.get(predecessor) {
-// 			Some(x) => &x.2,
-// 			_       => break,
-// 		};
-// 		len += 1;
-// 	}
-
-// 	let mut len: u16 = 0;
-// 	let mut elem: Vec<u16>;
-// 	loop {
-// 		elem = match end.pop() {
-// 			Some(x) => x,
-// 			_       => break, 
-// 		};
-// 		if opts.sleep {
-// 			println!("{}[2J{}",27 as char , termion::cursor::Goto(1, 1));
-// 		}
-// 		println!("N-puzzle: ");
-// 		puzzle::print_puzzle(&elem, final_state, opts);
-// 		if opts.sleep {
-// 			thread::sleep(time::Duration::from_millis(200));
-// 		}
-// 	}
-// 	let c_list_len = close_list.len();
-// 	println! ("nb movements: {} ", len);
-// 	println! ("Close list length : {} ", c_list_len);
-// 	len
-// }

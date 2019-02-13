@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 21:01:35 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 21:04:49 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -248,31 +248,4 @@ pub fn move_left(zero_pos: usize, final_state: & FinalPuzzle, predecessor: &RefP
 		return Ok( RefPuzzle::new(new_taquin, final_state, predecessor.clone(), opts, actual_dst) );
 	}
 	Err(std::io::Error::new(IoErr::Other, "unable to move left"))
-}
-
-pub fn print_puzzle(taquin: & Vec<u16>, final_state: &FinalPuzzle, opts: &Options) {
-	let size = final_state.size;
-	let sq: usize = (size * size) as usize;
-
-	for i in 0..sq {
-		if opts.color {
-		
-			if taquin[i] == 0 {}
-			else if final_state.position[taquin[i] as usize] == i as u16 {
-				print!("{}[92m", 27 as char);
-			}
-			else {
-				print!("{}[91m", 27 as char);
-			}
-			print!("{number:>width$} ", number=taquin[i], width=2);
-			print!("{}[0m", 27 as char);
-		}
-		else {
-			print!("{number:>width$} ", number=taquin[i], width=2);
-		}
-		if i % (size as usize) == size as usize - 1 {
-			print!("\n");
-		}
-	}
-	print!("\n");
 }
