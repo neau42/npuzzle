@@ -6,13 +6,13 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/15 19:08:20 by no                #+#    #+#             */
-/*   Updated: 2019/02/15 19:19:58 by no               ###   ########.fr       */
+/*   Updated: 2019/02/15 19:21:27 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::puzzle;
 
-pub fn estimate_one_manhattan(
+pub fn estimate_one(
     final_state_posx: i32,
     final_state_posy: i32,
     taquin: &[u16],

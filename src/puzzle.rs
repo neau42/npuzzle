@@ -6,11 +6,12 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/15 18:31:26 by no               ###   ########.fr       */
+/*   Updated: 2019/02/15 19:21:11 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::heuristics;
+use crate::manhattan;
 use crate::options::Options;
 use std::cmp::Ordering;
 use std::io;
@@ -210,7 +211,7 @@ impl Puzzle {
                 cmpt += 1;
             }
         }
-        (heuristics::estimate_one_manhattan(
+        (manhattan::estimate_one(
             (final_state.position[0] as i32) % final_state.size,
             (final_state.position[0] as i32) / final_state.size,
             &self.taq,
