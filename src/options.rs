@@ -6,38 +6,39 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/06 10:28:13 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 17:02:33 by no               ###   ########.fr       */
+/*   Updated: 2019/02/13 21:07:55 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #[derive(Debug)]
 pub enum HeuristicType {
-	Manhattan,
-	Hamming,
-	LinearConflict,
-	Djikstra,
-	Euclidean,
-	Chebyshev
+    Manhattan,
+    Hamming,
+    LinearConflict,
+    Djikstra,
+    Euclidean,
+    Chebyshev,
 }
 
 #[derive(Debug)]
 pub struct Options {
-	pub file_name: String,
-	pub file_name_present: bool,
-	pub heuristic: HeuristicType,
-	pub greedy: bool,
-	pub color: bool,
-	pub sleep: bool
+    pub file_name: String,
+    pub file_name_present: bool,
+    pub heuristic: HeuristicType,
+    pub greedy: bool,
+    pub color: bool,
+    pub sleep: bool,
 }
 
 impl Options {
-	pub fn new() -> Options {
-	Options {
-		file_name: "".to_string(),
-		file_name_present: false,
-		heuristic: HeuristicType::Hamming,
-		greedy: false,//?
-		color: false,
-		sleep: false }
-	}
+    pub fn new() -> Options {
+        Options {
+            file_name: "".to_string(),
+            file_name_present: false,
+            heuristic: HeuristicType::Hamming,
+            greedy: false,
+            color: false,
+            sleep: false,
+        }
+    }
 }
