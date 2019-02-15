@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/13 21:05:46 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 21:06:37 by no               ###   ########.fr       */
+/*   Updated: 2019/02/15 18:59:22 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,12 @@ use std::time;
 extern crate termion;
 use crate::options::Options;
 
-pub fn print_puzzle(taquin: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options) {
+pub fn print_puzzle(taquin: &[u16], final_state: &puzzle::FinalPuzzle, opts: &Options) {
     let size = final_state.size;
     let sq: usize = (size * size) as usize;
 
-    for i in 0..sq {
+    // for i in 0..sq {
+		for (i, _) in taquin.iter().enumerate().take(sq) {
         if opts.color {
             if taquin[i] == 0 {
             } else if final_state.position[taquin[i] as usize] == i as u16 {
@@ -36,10 +37,10 @@ pub fn print_puzzle(taquin: &Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: 
             print!("{number:>width$} ", number = taquin[i], width = 2);
         }
         if i % (size as usize) == size as usize - 1 {
-            print!("\n");
+            println!();
         }
     }
-    print!("\n");
+    println!();
 }
 
 pub fn print(
@@ -49,7 +50,7 @@ pub fn print(
     final_state: &puzzle::FinalPuzzle,
     opts: &Options,
 ) {
-    let ref mut list_final: Vec<Vec<u16>> = Vec::new();
+    let mut list_final: Vec<Vec<u16>> = Vec::new();
     let mut ref_predecessor;
     let mut predecessor;
     let mut taquin;
@@ -67,7 +68,6 @@ pub fn print(
         taquin = &puzzle.taq;
         list_final.push(taquin.clone());
         len += 1;
-        // }
     }
     let mut elem: Vec<u16>;
     loop {

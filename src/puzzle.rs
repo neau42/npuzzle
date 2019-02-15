@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 21:04:49 by no               ###   ########.fr       */
+/*   Updated: 2019/02/15 18:31:26 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -250,8 +250,7 @@ pub fn move_up(
     opts: &Options,
     actual_dst: i32,
 ) -> Result<RefPuzzle, io::Error> {
-    if !(zero_pos
-        >= final_state.size as usize * final_state.size as usize - final_state.size as usize)
+    if zero_pos < final_state.size as usize * final_state.size as usize - final_state.size as usize
     {
         let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
         new_taquin.swap(zero_pos, zero_pos + final_state.size as usize);
@@ -273,7 +272,7 @@ pub fn move_down(
     opts: &Options,
     actual_dst: i32,
 ) -> Result<RefPuzzle, io::Error> {
-    if !(zero_pos < final_state.size as usize) {
+    if zero_pos >= final_state.size as usize {
         let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
         new_taquin.swap(zero_pos, zero_pos - final_state.size as usize);
         return Ok(RefPuzzle::new(
@@ -293,7 +292,7 @@ pub fn move_right(
     opts: &Options,
     actual_dst: i32,
 ) -> Result<RefPuzzle, io::Error> {
-    if !(zero_pos % final_state.size as usize == 0) {
+    if zero_pos % final_state.size as usize != 0 {
         let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
         new_taquin.swap(zero_pos, zero_pos - 1);
         return Ok(RefPuzzle::new(
@@ -313,7 +312,7 @@ pub fn move_left(
     opts: &Options,
     actual_dst: i32,
 ) -> Result<RefPuzzle, io::Error> {
-    if !(zero_pos % final_state.size as usize == final_state.size as usize - 1) {
+    if zero_pos % final_state.size as usize != final_state.size as usize - 1 {
         let mut new_taquin = predecessor.ref_puzzle.borrow().taq.clone();
         new_taquin.swap(zero_pos, zero_pos + 1);
         return Ok(RefPuzzle::new(

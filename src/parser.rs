@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:15 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 20:57:38 by no               ###   ########.fr       */
+/*   Updated: 2019/02/15 19:05:50 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,11 @@ use std::io::{BufRead, BufReader};
 use std::process;
 
 pub fn get_puzzle(opts: &Options) -> Result<Puzzle, io::Error> {
-    match opts.file_name_present {
-        true => read_file(&opts.file_name),
-        false => Ok(generate_random_puzzle(3)),
-    }
+	if opts.file_name_present {
+		read_file(&opts.file_name)
+	} else {
+		Ok(generate_random_puzzle(3))
+	}
 }
 
 pub fn generate_random_puzzle(size: u16) -> Puzzle {
@@ -56,7 +57,7 @@ pub fn get_arg() -> Options {
     let args: Vec<String> = env::args().collect();
     let args: &[String] = &args[1..];
     let mut options = Options::new();
-    let ref mut opts = options;
+    let mut opts = &mut options;
 
     for elem in args {
         if !get_opts(opts, &elem) {
@@ -72,7 +73,7 @@ fn get_size(line: String) -> Option<i32> {
     let mut size: Option<i32> = None;
 
     for e in line.split_whitespace() {
-        if e.contains("#") {
+        if e.contains('#') {
             return size;
         }
         if size == None {
@@ -91,7 +92,7 @@ fn get_size(line: String) -> Option<i32> {
     size
 }
 
-fn read_file(name: &String) -> Result<Puzzle, io::Error> {
+fn read_file(name: &str) -> Result<Puzzle, io::Error> {
     let file = File::open(name)?;
     let mut v: Vec<u16> = Vec::new();
     let mut size_opt = None;
@@ -108,7 +109,7 @@ fn read_file(name: &String) -> Result<Puzzle, io::Error> {
         } else {
             let mut count = 0;
             for e in line.split_whitespace() {
-                if e.contains("#") {
+                if e.contains('#') {
                     break;
                 }
                 count += 1;

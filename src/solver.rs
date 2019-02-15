@@ -6,7 +6,7 @@
 /*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:10 by no                #+#    #+#             */
-/*   Updated: 2019/02/13 21:09:25 by no               ###   ########.fr       */
+/*   Updated: 2019/02/15 18:59:48 by no               ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,19 +39,16 @@ fn update_open_list(
          4] = &[
         puzzle::move_up,
         puzzle::move_down,
-        puzzle::move_left,
+        puzzle::move_left, 
         puzzle::move_right,
     ];
 
     for function in MOVE_FUNCTIONS {
-        match function(zero_pos, final_state, &r_puzzle, opts, actual_dst as i32) {
-            Ok(new_puzzle) => {
-                if !all_list.contains(&new_puzzle) {
-                    open_list.push(new_puzzle.clone());
-                    all_list.insert(new_puzzle);
-                }
+        if let Ok(new_puzzle) = function(zero_pos, final_state, &r_puzzle, opts, actual_dst as i32) {
+			if !all_list.contains(&new_puzzle) {
+				open_list.push(new_puzzle.clone());
+				all_list.insert(new_puzzle);
             }
-            _ => (),
         }
     }
 }
@@ -60,27 +57,25 @@ pub fn solve(first: Vec<u16>, final_state: &puzzle::FinalPuzzle, opts: &Options)
     let mut close_list: HashSet<RefPuzzle> = HashSet::new();
     let mut open_list: BinaryHeap<RefPuzzle> = BinaryHeap::new();
     let mut all_list: HashSet<RefPuzzle> = HashSet::new();
-    let ref mut o_list = open_list;
-    let ref mut a_list = all_list;
     let mut puzzle = RefPuzzle::first(first, final_state, opts);
     let mut actual_dst = 0;
 
     let not_greedy = if opts.greedy { 0 } else { 1 };
 
     let start = Instant::now();
-    a_list.insert(puzzle.clone());
+    all_list.insert(puzzle.clone());
     close_list.insert(puzzle.clone());
 
     while puzzle.ref_puzzle.borrow().taq != final_state.puzzle {
         update_open_list(
             puzzle,
-            o_list,
+            &mut open_list,
             final_state,
-            a_list,
+            &mut all_list,
             opts,
             actual_dst + not_greedy,
         );
-        puzzle = o_list.pop().unwrap();
+        puzzle = open_list.pop().unwrap();
         actual_dst = puzzle.ref_puzzle.borrow().actual_dst as usize;
         close_list.insert(puzzle.clone());
     }
