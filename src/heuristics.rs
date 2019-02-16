@@ -6,7 +6,7 @@
 /*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:16 by no                #+#    #+#             */
-/*   Updated: 2019/02/16 17:37:54 by nboulaye         ###   ########.fr       */
+/*   Updated: 2019/02/16 20:55:47 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ pub fn distance_estimator(
                 + manhattan::distance_estimator(taquin, final_state)
         }
         HeuristicType::Manhattan => manhattan::distance_estimator(taquin, final_state),
-        HeuristicType::Hamming => hamming::distance_estimator(taquin, final_state),
+        HeuristicType::Hamming   => hamming::distance_estimator(taquin, final_state),
         HeuristicType::Euclidean => euclidean::distance_estimator(taquin, final_state),
         HeuristicType::Chebyshev => chebyshev::distance_estimator(taquin, final_state),
-        HeuristicType::Djikstra => 0,
+        HeuristicType::Djikstra  => 0,
     }
 }

@@ -6,7 +6,7 @@
 #    By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/09/26 03:02:39 by no                #+#    #+#              #
-#    Updated: 2019/02/16 20:46:06 by nboulaye         ###   ########.fr        #
+#    Updated: 2019/02/16 21:44:35 by nboulaye         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,8 +25,6 @@ SRC = src/heuristics.rs\
 	src/puzzle.rs\
 	src/solver.rs
 
-OBJ = $(SRC:.c=.o)
-
 all: $(NAME)
 
 $(NAME): $(SRC)
@@ -37,7 +35,7 @@ clean:
 	cargo clean
 
 fclean: clean
-	rm npuzzle
+	@rm -f npuzzle
 
 re: fclean all
 
