@@ -6,7 +6,7 @@
 /*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/13 21:05:46 by no                #+#    #+#             */
-/*   Updated: 2019/02/16 20:28:57 by nboulaye         ###   ########.fr       */
+/*   Updated: 2019/02/16 22:34:38 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ pub fn print_puzzle(taquin: &[u16], final_state: &puzzle::FinalPuzzle, opts: &Op
     let size = final_state.size;
     let sq: usize = (size * size) as usize;
 
-    // for i in 0..sq {
     for (i, _) in taquin.iter().enumerate().take(sq) {
         if opts.color {
             if taquin[i] == 0 {
