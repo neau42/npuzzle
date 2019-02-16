@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   puzzle.rs                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/15 19:21:11 by no               ###   ########.fr       */
+/*   Updated: 2019/02/16 17:37:40 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::heuristics;
-use crate::manhattan;
+use heuristics::manhattan;
 use crate::options::Options;
+
 use std::cmp::Ordering;
 use std::io;
 use std::io::ErrorKind as IoErr;

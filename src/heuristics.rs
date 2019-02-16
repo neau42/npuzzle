@@ -3,21 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   heuristics.rs                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:16 by no                #+#    #+#             */
-/*   Updated: 2019/02/15 19:19:47 by no               ###   ########.fr       */
+/*   Updated: 2019/02/16 17:37:54 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+pub mod chebyshev;
+pub mod manhattan;
+pub mod linear_conflict;
+pub mod euclidean;
+pub mod hamming;
 
 use crate::options::HeuristicType;
 use crate::options::Options;
 use crate::puzzle;
-use crate::manhattan;
-use crate::hamming;
-use crate::linear_conflict;
-use crate::euclidean;
-use crate::chebyshev;
 
 pub fn distance_estimator(
     taquin:  &[u16],

@@ -3,20 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.rs                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/01 19:30:12 by no                #+#    #+#             */
-/*   Updated: 2019/02/15 19:19:28 by no               ###   ########.fr       */
+/*   Updated: 2019/02/16 17:39:42 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-// pub mod heuristics;
 pub mod heuristics;
-pub mod manhattan;
-pub mod hamming;
-pub mod euclidean;
-pub mod chebyshev;
-pub mod linear_conflict;
 pub mod options;
 pub mod parser;
 pub mod print;
