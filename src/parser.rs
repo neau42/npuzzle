@@ -23,11 +23,11 @@ use std::io::{BufRead, BufReader};
 use std::process;
 
 pub fn get_puzzle(opts: &Options) -> Result<Puzzle, io::Error> {
-	if opts.file_name_present {
-		read_file(&opts.file_name)
-	} else {
-		Ok(generate_random_puzzle(3))
-	}
+    if opts.file_name_present {
+        read_file(&opts.file_name)
+    } else {
+        Ok(generate_random_puzzle(3))
+    }
 }
 
 pub fn generate_random_puzzle(size: u16) -> Puzzle {

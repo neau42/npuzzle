@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   print.rs                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: no <no@student.42.fr>                      +#+  +:+       +#+        */
+/*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/13 21:05:46 by no                #+#    #+#             */
-/*   Updated: 2019/02/15 18:59:22 by no               ###   ########.fr       */
+/*   Updated: 2019/02/16 18:13:08 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ pub fn print_puzzle(taquin: &[u16], final_state: &puzzle::FinalPuzzle, opts: &Op
     let sq: usize = (size * size) as usize;
 
     // for i in 0..sq {
-		for (i, _) in taquin.iter().enumerate().take(sq) {
+    for (i, _) in taquin.iter().enumerate().take(sq) {
         if opts.color {
             if taquin[i] == 0 {
             } else if final_state.position[taquin[i] as usize] == i as u16 {
@@ -44,7 +44,7 @@ pub fn print_puzzle(taquin: &[u16], final_state: &puzzle::FinalPuzzle, opts: &Op
 }
 
 pub fn print(
-    close_list: &HashSet<RefPuzzle>,
+    all_list: &HashSet<RefPuzzle>,
     nb_states: usize,
     puzzle: &RefPuzzle,
     final_state: &puzzle::FinalPuzzle,
@@ -63,7 +63,7 @@ pub fn print(
             Some(ref_next) => ref_next,
             _ => break,
         };
-        predecessor = close_list.get(&ref_predecessor).unwrap();
+        predecessor = all_list.get(&ref_predecessor).unwrap();
         puzzle = predecessor.ref_puzzle.borrow();
         taquin = &puzzle.taq;
         list_final.push(taquin.clone());
@@ -84,9 +84,10 @@ pub fn print(
             thread::sleep(time::Duration::from_millis(200));
         }
     }
+
     println!("###\n# {:?} heuristic", opts.heuristic);
     println!("# {} movements", len);
-    println!("# {} states selected", close_list.len());
+    println!("# {} states selected", all_list.iter().filter(|x| x.ref_puzzle.borrow().in_close == true ).count());
     println!(
         "# {} states represented in memory at the same time",
         nb_states

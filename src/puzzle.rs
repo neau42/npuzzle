@@ -6,13 +6,13 @@
 /*   By: nboulaye <nboulaye@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/05 10:34:18 by no                #+#    #+#             */
-/*   Updated: 2019/02/16 17:37:40 by nboulaye         ###   ########.fr       */
+/*   Updated: 2019/02/16 18:03:29 by nboulaye         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 use crate::heuristics;
-use heuristics::manhattan;
 use crate::options::Options;
+use heuristics::manhattan;
 
 use std::cmp::Ordering;
 use std::io;
@@ -74,6 +74,7 @@ impl RefPuzzle {
                 total_dst: actual_dst + estimate_dst,
                 predecessor: Some(predecessor),
                 taq: taquin,
+				in_close: false
             })),
         }
     }
@@ -87,6 +88,7 @@ impl RefPuzzle {
                 actual_dst: 0,
                 total_dst: estimate_dst,
                 predecessor: None,
+				in_close: false
             })),
         }
     }
@@ -98,6 +100,7 @@ pub struct PuzzleRes {
     pub actual_dst: i32,
     pub total_dst: i32,
     pub predecessor: Option<RefPuzzle>,
+	pub in_close: bool,
 }
 
 impl Hash for PuzzleRes {
@@ -287,6 +290,7 @@ pub fn move_down(
     }
     Err(std::io::Error::new(IoErr::Other, "unable to move down"))
 }
+
 pub fn move_right(
     zero_pos: usize,
     final_state: &FinalPuzzle,
@@ -307,6 +311,7 @@ pub fn move_right(
     }
     Err(std::io::Error::new(IoErr::Other, "unable to move right"))
 }
+
 pub fn move_left(
     zero_pos: usize,
     final_state: &FinalPuzzle,

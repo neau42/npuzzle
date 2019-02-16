@@ -11,29 +11,29 @@
 /* ************************************************************************** */
 
 pub mod chebyshev;
-pub mod manhattan;
-pub mod linear_conflict;
 pub mod euclidean;
 pub mod hamming;
+pub mod linear_conflict;
+pub mod manhattan;
 
 use crate::options::HeuristicType;
 use crate::options::Options;
 use crate::puzzle;
 
 pub fn distance_estimator(
-    taquin:  &[u16],
+    taquin: &[u16],
     final_state: &puzzle::FinalPuzzle,
     opts: &Options,
 ) -> i32 {
     match opts.heuristic {
         HeuristicType::LinearConflict => {
             linear_conflict::distance_estimator(taquin, final_state)
-            + manhattan::distance_estimator(taquin, final_state)
+                + manhattan::distance_estimator(taquin, final_state)
         }
         HeuristicType::Manhattan => manhattan::distance_estimator(taquin, final_state),
-        HeuristicType::Hamming   => hamming::distance_estimator(taquin, final_state),
+        HeuristicType::Hamming => hamming::distance_estimator(taquin, final_state),
         HeuristicType::Euclidean => euclidean::distance_estimator(taquin, final_state),
         HeuristicType::Chebyshev => chebyshev::distance_estimator(taquin, final_state),
-        HeuristicType::Djikstra  => 0,
+        HeuristicType::Djikstra => 0,
     }
 }

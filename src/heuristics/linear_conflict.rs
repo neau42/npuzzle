@@ -34,14 +34,14 @@ pub fn distance_estimator(taquin: &[u16], final_state: &puzzle::FinalPuzzle) -> 
         final_pos_y = final_state.position[current_value] as usize / size;
         if current_pos_y == final_pos_y {
             //same line
-			for elem in taquin.iter().take(final_pos_y * size + size).skip(i + 1) {
-				 if *elem != 0
+            for elem in taquin.iter().take(final_pos_y * size + size).skip(i + 1) {
+                if *elem != 0
                     && final_state.position[*elem as usize] as usize / size == current_pos_y
                     && final_state.position[*elem as usize] as usize % size < final_pos_x
                 {
                     cmpt += 2;
                 }
-			}
+            }
         }
         if current_pos_x == final_pos_x {
             //same raw
