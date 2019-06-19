@@ -57,7 +57,7 @@ puzzle not solvable
 
 Resolution:
 
-![alt text] (readme/solve.gif)
+![alt text](readme/solve.gif)
 
 after resolution stats about heuristic, nb of movement needed, memory and time is print:
 ```
