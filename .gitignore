@@ -5,5 +5,7 @@ test_*
 **/*.rs.bk
 npuzzle-gen.py
 
+Puzzle_*
+
 npuzzle
 benches/
