@@ -8,9 +8,3 @@ edition = "2018"
 rand = "0.6.5"
 termion = "1.5.1"
 
-# [dev-dependencies]
-# criterion = "0.2.9"
-
-# [[bench]]
-# name = "my_benchmark"
-# harness = false
