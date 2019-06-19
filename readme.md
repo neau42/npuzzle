@@ -19,7 +19,7 @@ usage:	npuzzle [-c -g -H -L -M -C -s] [file_name]
 ```
 
 snail resolution:
-![alt text](https://github.com/neau42/npuzzle/blob/master/readme/SnailResolutionExemple.png)
+![alt text](readme/SnailResolutionExemple.png)
 
 
 Puzzle Exemple
@@ -57,7 +57,7 @@ puzzle not solvable
 
 Resolution:
 
-![] (https://giphy.com/gifs/cOzRE38JJyUAlAs8Ji)
+![] (readme/solve.gif)
 
 after resolution stats about heuristic, nb of movement needed, memory and time is print:
 ```
